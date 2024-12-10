@@ -1,4 +1,5 @@
 package com.dev.restLms.ProcessList.model;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -10,19 +11,23 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "offeredsubjects")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "offeredsubjects")
 public class ProcessListOfferedSubjects {
-	
-	@Id
+    @Id
+	@Column(name = "OFFERED_SUBJECTS_ID")
+	private String offeredSubjectsId;
+
 	@Column(name = "COURSE_ID")
-	private String courseId ;
+	private String courseId; 
 	
-	@Column(name = "TEACHER_SESSION_ID")
-	private String teacherSessionId;
+	@Column(name = "OFFICER_SESSION_ID")
+	private String officerSessionId ;
 	
+	@Column(name = "SUBJECT_ID")
+	private String subjectId;
 }

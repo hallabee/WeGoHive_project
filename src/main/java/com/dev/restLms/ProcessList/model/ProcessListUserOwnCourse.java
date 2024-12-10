@@ -18,9 +18,11 @@ import lombok.Setter;
 public class ProcessListUserOwnCourse {
 
 	@Id
-	@Column(name = "SESSION_ID")
     private String sessionId;
 
 	@Column(name = "COURSE_ID")
     private String courseId;
+
+    @Column(name = "OFFICER_SESSION_ID")
+    private String officerSessionId;
 }

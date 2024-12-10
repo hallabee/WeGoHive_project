@@ -16,18 +16,14 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "courseownsubject")
-public class ProcessListCourseOwnSubject {
+@Table(name = "userownassignment")
+public class ProcessListUserOwnAssignment {
 
     @Id
-    @Column(name = "COURSE_ID")
-    private String courseId;
+    @Column(name = "USER_SESSION_ID")
+    private String userSessionId;
 
-    
-    @Column(name = "OFFICER_SESSION_ID")
-	private String officerSessionId ;
-	
-	@Column(name = "SUBJECT_ID")
-	private String subjectId;
+    @Column(name = "OFFERED_SUBJECTS_ID")
+    private String offeredSubjectsId;
     
 }

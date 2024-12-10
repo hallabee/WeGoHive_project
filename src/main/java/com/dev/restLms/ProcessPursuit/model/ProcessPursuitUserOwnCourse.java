@@ -18,7 +18,6 @@ import lombok.Setter;
 public class ProcessPursuitUserOwnCourse {
 
 	@Id
-	@Column(name = "SESSION_ID")
     private String sessionId;
 
 	@Column(name = "COURSE_ID")

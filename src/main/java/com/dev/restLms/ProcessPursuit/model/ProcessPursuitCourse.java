@@ -22,6 +22,7 @@ public class ProcessPursuitCourse {
 	@Column(name = "COURSE_ID")
 	private String courseId; 
 	
+	private String sessionId;
 	@Column(name = "COURSE_TITLE")
 	private String courseTitle;
 	@Column(name = "COURSE_CAPACITY")

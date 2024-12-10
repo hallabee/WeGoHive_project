@@ -16,18 +16,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "courseownsubject")
-public class ProcessListCourseOwnSubject {
-
+@Table(name = "subjectownvideo")
+public class ProcessListSubjectOwnVideo {
     @Id
-    @Column(name = "COURSE_ID")
-    private String courseId;
+	@Column(name = "EPISODE_ID")
+	private int episodeId;
 
-    
-    @Column(name = "OFFICER_SESSION_ID")
-	private String officerSessionId ;
-	
-	@Column(name = "SUBJECT_ID")
-	private String subjectId;
-    
+	@Column(name = "SOV_OFFERED_SUBJECTS_ID")
+	private String sovOfferedSubjectsId;
+
 }

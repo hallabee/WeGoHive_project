@@ -8,6 +8,6 @@ import java.util.List;
 
 
 @Repository
-public interface ProcessListUserRepository extends JpaRepository<ProcessListUser, String>{
+public interface ProcessListUserRepository extends JpaRepository<ProcessListUser, String> {
     List<ProcessListUser> findBySessionId(String sessionId);
 }

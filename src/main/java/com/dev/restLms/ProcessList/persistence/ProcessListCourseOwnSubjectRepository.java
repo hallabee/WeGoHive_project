@@ -9,5 +9,5 @@ import java.util.List;
 
 @Repository
 public interface ProcessListCourseOwnSubjectRepository extends JpaRepository<ProcessListCourseOwnSubject, String> {
-    List<ProcessListCourseOwnSubject> findByCourseId(String courseId);
+    List<ProcessListCourseOwnSubject> findByCourseIdAndOfficerSessionId(String courseId, String officerSessionId);
 }

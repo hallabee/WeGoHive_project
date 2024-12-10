@@ -10,8 +10,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
-
 @Entity
 @Getter
 @Setter
@@ -22,9 +20,10 @@ import lombok.Setter;
 public class ProcessListUser {
 
     @Id
-	@Column(name = "SESSION_ID")
     private String sessionId;
 
-	@Column(name = "USER_NAME")
+    @Column(name = "USER_NAME")
     private String userName;
+
+    
 }

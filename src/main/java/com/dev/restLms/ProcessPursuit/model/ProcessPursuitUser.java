@@ -1,4 +1,4 @@
-package com.dev.restLms.ProcessList.model;
+package com.dev.restLms.ProcessPursuit.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,18 +16,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "courseownsubject")
-public class ProcessListCourseOwnSubject {
+@Table(name = "user")
+public class ProcessPursuitUser {
 
     @Id
-    @Column(name = "COURSE_ID")
-    private String courseId;
+    private String sessionId;
 
-    
-    @Column(name = "OFFICER_SESSION_ID")
-	private String officerSessionId ;
-	
-	@Column(name = "SUBJECT_ID")
-	private String subjectId;
+    @Column(name = "USER_NAME")
+    private String userName;
     
 }
