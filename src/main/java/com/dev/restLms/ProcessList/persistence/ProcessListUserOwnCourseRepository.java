@@ -6,10 +6,12 @@ import org.springframework.stereotype.Repository;
 import com.dev.restLms.ProcessList.model.ProcessListUserOwnCourse;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Repository
 public interface ProcessListUserOwnCourseRepository extends JpaRepository<ProcessListUserOwnCourse, String>{
     List<ProcessListUserOwnCourse> findByCourseId(String courseId);
-    boolean existsByCourseIdAndSessionIdAndOfficerSessionId(String courseId, String sessionId, String officerSessionId);
+    Optional<ProcessListUserOwnCourse> findByCourseIdAndSessionId(String courseId, String sessionId);
+    List<ProcessListUserOwnCourse> findBySessionId(String sessionId);
 }
