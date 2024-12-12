@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dev.restLms.QuestionBoardPost.model.QuestionBoardPostBoardPost;
 import com.dev.restLms.QuestionBoardPost.model.QuestionBoardPostComment;
 import com.dev.restLms.QuestionBoardPost.persistence.QuestionBoardPostBoardPostRepository;
-import com.dev.restLms.QuestionBoardPost.persistence.QuestionBoardPostBoardRepository;
 import com.dev.restLms.QuestionBoardPost.persistence.QuestionBoardPostCommentRepository;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,9 +27,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/quesionBoard")
 @Tag(name = "QuestionBoardPostController", description = "과목별 질문 게시판의 게시글")
 public class QuestionBoardPostController {
-
-    // @Autowired
-    // private QuestionBoardPostBoardRepository questionBoardPostBoardRepository;
 
     @Autowired
     private QuestionBoardPostBoardPostRepository questionBoardPostBoardPostRepository;
@@ -49,20 +45,24 @@ public class QuestionBoardPostController {
             // 게시글 테이블에서 게시글이 있는지 확인
             Optional<QuestionBoardPostBoardPost> boardPost = questionBoardPostBoardPostRepository.findBySessionIdAndPostId(sessionId, postId);
 
+            if(boardPost.isEmpty()){
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("비밀글 입니다");
+            }
+
             Optional<QuestionBoardPostComment> comment = questionBoardPostCommentRepository.findByPostId(boardPost.get().getPostId());
 
-            if(boardPost.get().getSessionId().equals(sessionId)){
+            if(boardPost.isPresent()){
 
                  // 결과를 저장할 리스트
                 List<Map<String, String>> resultList = new ArrayList<>();
 
                 HashMap<String, String> posts = new HashMap<>();
-                posts.put("sessionId", sessionId);
+                posts.put("postSessionId", sessionId);
                 posts.put("postID", postId);
-                posts.put("authorNickname", boardPost.get().getAuthorNickname());
-                posts.put("createdDate", boardPost.get().getCreatedDate());
-                posts.put("title", boardPost.get().getTitle());
-                posts.put("content", boardPost.get().getContent());
+                posts.put("postAuthorNickname", boardPost.get().getAuthorNickname());
+                posts.put("postCreatedDate", boardPost.get().getCreatedDate());
+                posts.put("postTitle", boardPost.get().getTitle());
+                posts.put("postContent", boardPost.get().getContent());
 
                 resultList.add(posts);
 
@@ -70,10 +70,10 @@ public class QuestionBoardPostController {
                     
                     HashMap<String, String> comments = new HashMap<>();
                     comments.put("commentId", comment.get().getCommentId());
-                    comments.put("authorNickname", comment.get().getAuthorNickname());
-                    comments.put("createdDate", comment.get().getCreatedDate());
+                    comments.put("commentAuthorNickname", comment.get().getAuthorNickname());
+                    comments.put("commentCreatedDate", comment.get().getCreatedDate());
                     comments.put("comment", comment.get().getContent());
-                    comments.put("sessionId", comment.get().getSessionId());
+                    comments.put("commentSessionId", comment.get().getSessionId());
     
                     resultList.add(comments);
 
