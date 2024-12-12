@@ -10,7 +10,7 @@ import java.util.Optional;
 
 
 @Repository
-public interface ProcessListUserOwnCourseRepository extends JpaRepository<ProcessListUserOwnCourse, String>{
+public interface ProcessListUserOwnCourseRepository extends JpaRepository<ProcessListUserOwnCourse, Object>{
     List<ProcessListUserOwnCourse> findByCourseId(String courseId);
     Optional<ProcessListUserOwnCourse> findByCourseIdAndSessionId(String courseId, String sessionId);
     List<ProcessListUserOwnCourse> findBySessionId(String sessionId);

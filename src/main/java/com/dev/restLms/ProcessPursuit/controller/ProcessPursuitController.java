@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("course")
+@RequestMapping("/course")
 @Tag(name = "ProcessPursuitController", description = "과정 목록 및 해당 과정의 수강자 수, 과정 책임자")
 public class ProcessPursuitController {
 

@@ -41,7 +41,7 @@ import java.util.Optional;
 
 
 @RestController
-@RequestMapping("course")
+@RequestMapping("/course")
 @Tag(name = "ProcessListController", description = "과정 목록 및 해당 과정의 수강자 수, 과정 책임자")
 public class ProcessListController {
 
@@ -118,7 +118,7 @@ public class ProcessListController {
         return resultList;
     }
 
-    @PostMapping
+    @PostMapping("/registerCourse")
     @Operation(summary = "사용자가 과정 등록", description = "사용자가 과정을 등록합니다.")
     public ResponseEntity<String> userPutCourse(
         @RequestParam String sessionId,
