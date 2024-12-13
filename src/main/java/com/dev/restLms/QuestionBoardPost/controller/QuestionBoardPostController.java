@@ -59,10 +59,10 @@ public class QuestionBoardPostController {
 
             String permissionName = permissionGroup.get().getPermissionName();
 
-            // 게시글글의 세션아이디를 확인하기 위함함
+            // 게시글의 세션아이디를 확인하기 위함함
             Optional<QuestionBoardPostBoardPost> boardPost = questionBoardPostBoardPostRepository.findByPostId(postId);
 
-            if(permissionName.equals("STUDENT")){
+            if(permissionName.equals("STUDENT") && boardPost.get().getIsNotice().equals("F")){
                 // 사용자의 세션 아이디와 게시글 작성자의 세션아이디가 같은지 확인하기 위함함
                 Optional<QuestionBoardPostBoardPost> userCheck = questionBoardPostBoardPostRepository.findBySessionIdAndPostId(sessionId, postId);
                 if(userCheck.isEmpty()){

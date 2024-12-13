@@ -39,5 +39,8 @@ public class QuestionBoardPost {
     private String boardId;
 
     private String sessionId;
+
+    @Column(name = "IS_NOTICE")
+    private String isNotice;
     
 }

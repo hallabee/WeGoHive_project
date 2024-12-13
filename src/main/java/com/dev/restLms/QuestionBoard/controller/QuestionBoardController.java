@@ -163,6 +163,7 @@ public class QuestionBoardController {
             postMap.put("title", post.getTitle());
             postMap.put("authorNickname", post.getAuthorNickname());
             postMap.put("createdDate", post.getCreatedDate());
+            postMap.put("isNotice", post.getIsNotice());
             postMap.put("teacherSessionId", offeredSubjects.get().getTeacherSessionId());
             postMap.put("boardCategory", questionBoard.get().getBoardCategory());
             postMap.put("subjectName", subject.get().getSubjectName());

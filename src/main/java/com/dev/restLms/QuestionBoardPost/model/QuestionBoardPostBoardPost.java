@@ -40,4 +40,7 @@ public class QuestionBoardPostBoardPost {
 
     private String sessionId;
 
+    @Column(name = "IS_NOTICE")
+    private String isNotice;
+
 }
