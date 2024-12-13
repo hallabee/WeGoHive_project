@@ -94,7 +94,6 @@ public class ProcessListController {
             int studentCount = userCount.size();
 
             // 과정 책임자 정보 조회
-            // List<ProcessListUser> processListUsers = processListUserRepository.findBySessionId(course.getSessionId());
             Optional<ProcessListUser> processListUsers = processListUserRepository.findBySessionId(course.getSessionId());
 
             // 각 과정 정보와 수강자 수를 HashMap에 추가
@@ -108,9 +107,6 @@ public class ProcessListController {
             courseMap.put("courseImg", course.getCourseImg());
 
             // 책임자 정보 가져오기
-            // ProcessListUser officer = processListUsers.get(0);
-            // courseMap.put("courseOfficerSessionId", officer.getSessionId());
-            // courseMap.put("courseOfficerUserName", officer.getUserName());
             courseMap.put("courseOfficerSessionId", processListUsers.get().getSessionId());
             courseMap.put("courseOfficerUserName", processListUsers.get().getUserName());
 
@@ -134,117 +130,104 @@ public class ProcessListController {
 
         // 사용자의 권한이 있는지 확인
         if(userPermissionGroup.isPresent()){
+
             // 권한 아이디 저장
-            String permissionGroupUuid2 = userPermissionGroup.get().getPermissionGroupUuid2();
+            String permissionGroupUuid = userPermissionGroup.get().getPermissionGroupUuid2();
 
             // 권한 그룹에서의 권한 아이디 확인
-            Optional<ProcessListPermissionGroup> permissionGroup = processListPermissionGroupRepository.findByPermissionGroupUuid(permissionGroupUuid2);
+            Optional<ProcessListPermissionGroup> userPermissionName = processListPermissionGroupRepository.findByPermissionGroupUuid(permissionGroupUuid);
 
             // 권한 그룹에 권한 아이디가 있는지 확인
-            if(permissionGroup.isPresent()){
+            if(userPermissionName.isPresent()){
 
-                // 권한 아이디에 대한 권한 명 저장
-                String permissionGroupName = permissionGroup.get().getPermissionName();
+                // 권한 아이디의 권한 명 저장
+                String permissionName = userPermissionName.get().getPermissionName();
 
-                // 사용자의 세션아이디에 대한 권한 명이 STUDENT인지 확인
-                if(permissionGroupName.equals("STUDENT")){
+                // 사용자의 권한 명이 STUDENT인지 확인
+                if(permissionName.equals("STUDENT")){
 
                     // 사용자의 과정 목록 확인
-                    List<ProcessListUserOwnCourse> listUserOwnCourses = processListUserOwnCourseRepository.findBySessionId(sessionId);
+                    List<ProcessListUserOwnCourse> userOwnCourses = processListUserOwnCourseRepository.findBySessionId(sessionId);
 
-                    // 사용자가 현재 과정을 듣고 있는지 확인
-                    boolean userHaveCourse = false;
-
-                    if(listUserOwnCourses.isEmpty()){
-                        userHaveCourse = true;
-                    }else{
-                        for(ProcessListUserOwnCourse listUserOwnCourse : listUserOwnCourses){
-                            if("F".equals(listUserOwnCourse.getCourseApproval())){
-                                userHaveCourse = false;
-                                break;
-                            }else{
-                                userHaveCourse = true;
-                            }
-                            continue;
+                    // 이미 과정을 듣고 있으면 거짓 없으면 참
+                    boolean userCourses = true;
+                    for(ProcessListUserOwnCourse userOwnCourse : userOwnCourses){
+                        if(userOwnCourse.getCourseApproval().equals("F")){
+                            userCourses = false;
+                            break;
+                        }else{
+                            userCourses = true;
                         }
                     }
 
-                    if (userHaveCourse) {
-                        
-                        // UserOwnCourse 사용자 세션아이디, 과정 코드, 관리자 세션 아이디 저장
-                        ProcessListUserOwnCourse userOwnCourse = ProcessListUserOwnCourse.builder()
+                    // 듣고 있는 과정이 없을 때 실행행
+                    if(userCourses){
+                        ProcessListUserOwnCourse postUserOwnCourse = ProcessListUserOwnCourse.builder()
                         .sessionId(sessionId)
                         .courseId(courseId)
                         .officerSessionId(officerSessionId)
                         .build();
-                        processListUserOwnCourseRepository.save(userOwnCourse);
+                        processListUserOwnCourseRepository.save(postUserOwnCourse);
 
-                        // UserOwnAssigment 및 UserOwnSubjectVideo에 해당 과정의 과목 목록 정보 확인
-                        List<ProcessListCourseOwnSubject> courseOwnSubjects = processListCourseOwnSubjectRepository.findByCourseIdAndOfficerSessionId(courseId, officerSessionId);
+                        // 해당 과정의 과목 목록 확인인
+                        List<ProcessListCourseOwnSubject> courseOwnSubjects = processListCourseOwnSubjectRepository.findByCourseId(courseId);
 
-                            for(ProcessListCourseOwnSubject courseOwnSubject : courseOwnSubjects){
+                        for(ProcessListCourseOwnSubject courseOwnSubject : courseOwnSubjects){
 
-                                // 개설과목 코드 확인
-                                List<ProcessListOfferedSubjects> offeredSubjects = processListOfferedSubjectsRepository.findByCourseIdAndOfficerSessionIdAndSubjectId(courseOwnSubject.getCourseId(), courseOwnSubject.getOfficerSessionId(), courseOwnSubject.getSubjectId());
+                            // 해당 과목이 개설된 과목인지 확인인
+                            Optional<ProcessListOfferedSubjects> offeredSubject = processListOfferedSubjectsRepository.findBySubjectId(courseOwnSubject.getSubjectId());
 
-                                for(ProcessListOfferedSubjects offeredSubject : offeredSubjects){
+                            if(offeredSubject.isPresent()){
 
-                                    // 사용자가 과목을 듣고 있는지 또는 과목을 수료했는지 확인
-                                    List<ProcessListUserOwnSubjectVideo> userSubjectsCompletion = processListUserOwnSubjectVideoRepository.findByUosvSessionIdAndUosvOfferedSubjectsId(sessionId, offeredSubject.getOfferedSubjectsId());
+                                // 사용자가 듣고 있는 과목이 있는지 확인인
+                                List<ProcessListUserOwnAssignment> userOwnAssignments = processListUserOwnAssignmentRepository.findByOfferedSubjectsIdAndUserSessionId(offeredSubject.get().getOfferedSubjectsId(), sessionId);
 
-                                    // 사용자가 과목을 듣고 있는지 확인
-                                    List<ProcessListUserOwnAssignment> userHaveOwnAssignment = processListUserOwnAssignmentRepository.findByOfferedSubjectsIdAndUserSessionId(offeredSubject.getOfferedSubjectsId(), sessionId);
+                                // 신청한 과목이 없거나 해당 과목 영상의 진행도가 모두 100 이상이면 참 아니면 거짓
+                                boolean userSubject = false;
+                                if(userOwnAssignments.isEmpty()){
+                                    userSubject = true;
+                                }else{
+                                    List<ProcessListUserOwnSubjectVideo> userOwnSubjectVideos = processListUserOwnSubjectVideoRepository.findByUosvSessionIdAndUosvOfferedSubjectsId(sessionId, offeredSubject.get().getOfferedSubjectsId());
 
-                                    // 사용자가 현재 과정을 듣고 있는지 확인
-                                    boolean userHaveSubject = false;
-
-                                    if(userHaveOwnAssignment.isEmpty()){
-                                        userHaveCourse = true;
-                                    }else{
-                                        for(ProcessListUserOwnSubjectVideo userSubjectCompletion : userSubjectsCompletion){
-                                            if(userSubjectCompletion.getProgress() < 100){
-                                                userHaveCourse = false;
-                                                break;
-                                            }else{
-                                                userHaveCourse = true;
-                                            }
-                                            continue;
-                                        }
-                                    }
-
-                                    if(userHaveSubject){
-
-                                        // UserOwnAssigment 사용자 세션아이디, 개설과목코드 저장
-                                        ProcessListUserOwnAssignment userOwnAssignment = ProcessListUserOwnAssignment.builder()
-                                        .userSessionId(sessionId)
-                                        .offeredSubjectsId(offeredSubject.getOfferedSubjectsId())
-                                        .build();
-                                        processListUserOwnAssignmentRepository.save(userOwnAssignment);
-    
-                                        // 개설과목 영상 확인
-                                        List<ProcessListSubjectOwnVideo> subjectOwnVideos = processListSubjectOwnVideoRepository.findBySovOfferedSubjectsId(offeredSubject.getOfferedSubjectsId());
-    
-                                        for(ProcessListSubjectOwnVideo subjectOwnVideo : subjectOwnVideos){
-    
-                                            // UserOwnSubjectVideo 사용자 세션아이디, 에피소드아이디, 개설과목코드
-                                            ProcessListUserOwnSubjectVideo userOwnSubjectVideo = ProcessListUserOwnSubjectVideo.builder()
-                                            .uosvSessionId(sessionId)
-                                            .uosvEpisodeId(subjectOwnVideo.getEpisodeId())
-                                            .uosvOfferedSubjectsId(subjectOwnVideo.getSovOfferedSubjectsId())
-                                            .build();
-                                            processListUserOwnSubjectVideoRepository.save(userOwnSubjectVideo);
-    
+                                    for(ProcessListUserOwnSubjectVideo userOwnSubjectVideo : userOwnSubjectVideos){
+                                        if(userOwnSubjectVideo.getProgress()<100){
+                                            userSubject = false;
+                                            break;
+                                        }else{
+                                            userSubject = true;
                                         }
                                     }
                                 }
+
+                                if(userSubject){
+                                    ProcessListUserOwnAssignment postUserOwnAssignment = ProcessListUserOwnAssignment.builder()
+                                    .userSessionId(sessionId)
+                                    .offeredSubjectsId(offeredSubject.get().getOfferedSubjectsId())
+                                    .build();
+                                    processListUserOwnAssignmentRepository.save(postUserOwnAssignment);
+
+                                    // 해당 과목의 영상 목록 확인
+                                    List<ProcessListSubjectOwnVideo> subjectOwnVideos = processListSubjectOwnVideoRepository.findBySovOfferedSubjectsId(offeredSubject.get().getOfferedSubjectsId());
+                                    for(ProcessListSubjectOwnVideo subjectOwnVideo : subjectOwnVideos){
+                                        ProcessListUserOwnSubjectVideo postUserSubjectOwnVideo = ProcessListUserOwnSubjectVideo.builder()
+                                        .uosvSessionId(sessionId)
+                                        .uosvEpisodeId(subjectOwnVideo.getEpisodeId())
+                                        .uosvOfferedSubjectsId(subjectOwnVideo.getSovOfferedSubjectsId())
+                                        .build();
+                                        processListUserOwnSubjectVideoRepository.save(postUserSubjectOwnVideo);
+                                    }
+                                }
+                            }else{
+                                return ResponseEntity.status(HttpStatus.CONFLICT).body("개설 과목이 아닙니다");
                             }
-                            return ResponseEntity.ok().body("과정 신청이 완료되었습니다.");
-                    }else{
-                        return ResponseEntity.status(HttpStatus.CONFLICT).body("다른 과정을 듣고 있습니다.");
+                        }
+                        return ResponseEntity.ok().body("수강신청 완료");
                     }
+                    return ResponseEntity.status(HttpStatus.CONFLICT).body("다른 과정을 듣고 있습니다.");
                 }
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("수강신청 권한이 없습니다.");
             }
         }
-        return ResponseEntity.status(HttpStatus.CONFLICT).body("수강 신청에 대한 권한이 없습니다");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body("권한이 없습니다.");
     }
 }

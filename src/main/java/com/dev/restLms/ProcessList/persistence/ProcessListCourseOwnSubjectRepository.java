@@ -8,6 +8,7 @@ import java.util.List;
 
 
 @Repository
-public interface ProcessListCourseOwnSubjectRepository extends JpaRepository<ProcessListCourseOwnSubject, String> {
+public interface ProcessListCourseOwnSubjectRepository extends JpaRepository<ProcessListCourseOwnSubject, Object> {
     List<ProcessListCourseOwnSubject> findByCourseIdAndOfficerSessionId(String courseId, String officerSessionId);
+    List<ProcessListCourseOwnSubject> findByCourseId(String courseId);
 }

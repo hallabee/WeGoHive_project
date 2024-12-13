@@ -2,6 +2,8 @@ package com.dev.restLms.ProcessList.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -20,9 +22,12 @@ import lombok.Setter;
 public class ProcessListCourseOwnSubject {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "INCREASE_ID")
+    private int increaseId;
+    
     @Column(name = "COURSE_ID")
     private String courseId;
-
     
     @Column(name = "OFFICER_SESSION_ID")
 	private String officerSessionId ;
