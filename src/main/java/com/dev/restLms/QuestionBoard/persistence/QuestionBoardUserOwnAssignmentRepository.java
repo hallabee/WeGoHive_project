@@ -8,6 +8,6 @@ import java.util.Optional;
 
 
 @Repository
-public interface QuestionBoardUserOwnAssignmentRepository extends JpaRepository<QuestionBoardUserOwnAssignment, String> {
+public interface QuestionBoardUserOwnAssignmentRepository extends JpaRepository<QuestionBoardUserOwnAssignment, Object> {
     Optional<QuestionBoardUserOwnAssignment> findByOfferedSubjectsIdAndUserSessionId(String offeredSubjectsId, String userSessionId);
 }
