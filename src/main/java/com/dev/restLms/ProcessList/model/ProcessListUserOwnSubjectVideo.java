@@ -33,4 +33,7 @@ public class ProcessListUserOwnSubjectVideo {
 
     @Column(name = "UOSV_OFFERED_SUBJECTS_ID")
     private String uosvOfferedSubjectsId;
+
+    @Column(name = "PROGRESS")
+    private int progress;
 }

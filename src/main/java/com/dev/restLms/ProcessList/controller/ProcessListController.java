@@ -190,16 +190,19 @@ public class ProcessListController {
                                 for(ProcessListOfferedSubjects offeredSubject : offeredSubjects){
 
                                     // 사용자가 과목을 듣고 있는지 또는 과목을 수료했는지 확인
+                                    List<ProcessListUserOwnSubjectVideo> userSubjectsCompletion = processListUserOwnSubjectVideoRepository.findByUosvSessionIdAndUosvOfferedSubjectsId(sessionId, offeredSubject.getOfferedSubjectsId());
+
+                                    // 사용자가 과목을 듣고 있는지 확인
                                     List<ProcessListUserOwnAssignment> userHaveOwnAssignment = processListUserOwnAssignmentRepository.findByOfferedSubjectsIdAndUserSessionId(offeredSubject.getOfferedSubjectsId(), sessionId);
 
                                     // 사용자가 현재 과정을 듣고 있는지 확인
                                     boolean userHaveSubject = false;
 
-                                    if(listUserOwnCourses.isEmpty()){
+                                    if(userHaveOwnAssignment.isEmpty()){
                                         userHaveCourse = true;
                                     }else{
-                                        for(ProcessListUserOwnAssignment userHaveAssignment : userHaveOwnAssignment){
-                                            if("F".equals(userHaveAssignment.getSubjectAcceptCartegory())){
+                                        for(ProcessListUserOwnSubjectVideo userSubjectCompletion : userSubjectsCompletion){
+                                            if(userSubjectCompletion.getProgress() < 100){
                                                 userHaveCourse = false;
                                                 break;
                                             }else{
@@ -209,7 +212,7 @@ public class ProcessListController {
                                         }
                                     }
 
-                                    if(userHaveOwnAssignment.isEmpty() || userHaveSubject){
+                                    if(userHaveSubject){
 
                                         // UserOwnAssigment 사용자 세션아이디, 개설과목코드 저장
                                         ProcessListUserOwnAssignment userOwnAssignment = ProcessListUserOwnAssignment.builder()
