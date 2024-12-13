@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface QuestionBoardPostBoardPostRepository extends JpaRepository<QuestionBoardPostBoardPost, String> {
     Optional<QuestionBoardPostBoardPost> findBySessionId(String sessionId);
 
-    Optional<QuestionBoardPostBoardPost> findByBoardId(String boardId);
+    Optional<QuestionBoardPostBoardPost> findByPostId(String postId);
 
     Optional<QuestionBoardPostBoardPost> findBySessionIdAndPostId(String sessionId, String postId);
 

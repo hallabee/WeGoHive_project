@@ -14,8 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dev.restLms.QuestionBoardPost.model.QuestionBoardPostBoardPost;
 import com.dev.restLms.QuestionBoardPost.model.QuestionBoardPostComment;
+import com.dev.restLms.QuestionBoardPost.model.QuestionBoardPostPermissionGroup;
+import com.dev.restLms.QuestionBoardPost.model.QuestionBoardPostUserOwnPermissionGroup;
 import com.dev.restLms.QuestionBoardPost.persistence.QuestionBoardPostBoardPostRepository;
 import com.dev.restLms.QuestionBoardPost.persistence.QuestionBoardPostCommentRepository;
+import com.dev.restLms.QuestionBoardPost.persistence.QuestionBoardPostPermissionGroupRepository;
+import com.dev.restLms.QuestionBoardPost.persistence.QuestionBoardPostUserOwnPermissionGroupRepository;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,6 +38,12 @@ public class QuestionBoardPostController {
     @Autowired
     private QuestionBoardPostCommentRepository questionBoardPostCommentRepository;
 
+    @Autowired
+    private QuestionBoardPostPermissionGroupRepository questionBoardPostPermissionGroupRepository;
+
+    @Autowired
+    private QuestionBoardPostUserOwnPermissionGroupRepository questionBoardPostUserOwnPermissionGroupRepository;
+
     @GetMapping("/boradPost")
     @Operation(summary = "사용자의 질문과 답변", description = "질문과 답변을 반환합니다")
     public ResponseEntity<?> getboardPost(
@@ -41,12 +51,19 @@ public class QuestionBoardPostController {
         @RequestParam String postId
         ) {
 
-            // 게시글을 작성한 사용자와 로그인한 사용자의 세션아이디가 일치하는지 확인
-            // 게시글 테이블에서 게시글이 있는지 확인
-            Optional<QuestionBoardPostBoardPost> boardPost = questionBoardPostBoardPostRepository.findBySessionIdAndPostId(sessionId, postId);
+            Optional<QuestionBoardPostUserOwnPermissionGroup> userOwnPermissionGroup = questionBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
 
-            if(boardPost.isEmpty()){
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("비밀글 입니다");
+            Optional<QuestionBoardPostPermissionGroup> permissionGroup = questionBoardPostPermissionGroupRepository.findByPermissionGroupUuid(userOwnPermissionGroup.get().getPermissionGroupUuid2());
+
+            String permissionName = permissionGroup.get().getPermissionName();
+
+            Optional<QuestionBoardPostBoardPost> boardPost = questionBoardPostBoardPostRepository.findByPostId(postId);
+
+            if(permissionName.equals("STUDENT")){
+                Optional<QuestionBoardPostBoardPost> userCheck = questionBoardPostBoardPostRepository.findBySessionIdAndPostId(sessionId, postId);
+                if(userCheck.isEmpty()){
+                    return ResponseEntity.status(HttpStatus.CONFLICT).body("비밀글 입니다");
+                }
             }
 
             Optional<QuestionBoardPostComment> comment = questionBoardPostCommentRepository.findByPostId(boardPost.get().getPostId());
@@ -57,8 +74,8 @@ public class QuestionBoardPostController {
                 List<Map<String, String>> resultList = new ArrayList<>();
 
                 HashMap<String, String> posts = new HashMap<>();
-                posts.put("postSessionId", sessionId);
-                posts.put("postID", postId);
+                posts.put("postSessionId", boardPost.get().getSessionId());
+                posts.put("postID", boardPost.get().getPostId());
                 posts.put("postAuthorNickname", boardPost.get().getAuthorNickname());
                 posts.put("postCreatedDate", boardPost.get().getCreatedDate());
                 posts.put("postTitle", boardPost.get().getTitle());

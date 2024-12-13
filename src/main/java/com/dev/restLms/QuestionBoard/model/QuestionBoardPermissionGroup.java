@@ -16,20 +16,14 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "offeredsubjects")
-public class QuestionBoardOfferedSubjects {
+@Table(name = "permissiongroup")
+public class QuestionBoardPermissionGroup {
 
     @Id
-    @Column(name = "OFFERED_SUBJECTS_ID")
-    private String offeredSubjectsId;
+    @Column(name = "PERMISSION_GROUP_UUID")
+    private String permissionGroupUuid;
 
-    @Column(name = "TEACHER_SESSION_ID")
-    private String teacherSessionId;
-
-    @Column(name = "SUBJECT_ID")
-    private String subjectId;
-
-    @Column(name = "OFFICER_SESSION_ID")
-    private String officerSessionId;
+    @Column(name = "PERMISSION_NAME")
+    private String permissionName;
     
 }
