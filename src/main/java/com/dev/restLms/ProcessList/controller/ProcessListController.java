@@ -94,7 +94,8 @@ public class ProcessListController {
             int studentCount = userCount.size();
 
             // 과정 책임자 정보 조회
-            List<ProcessListUser> processListUsers = processListUserRepository.findBySessionId(course.getSessionId());
+            // List<ProcessListUser> processListUsers = processListUserRepository.findBySessionId(course.getSessionId());
+            Optional<ProcessListUser> processListUsers = processListUserRepository.findBySessionId(course.getSessionId());
 
             // 각 과정 정보와 수강자 수를 HashMap에 추가
             HashMap<String, Object> courseMap = new HashMap<>();
@@ -107,9 +108,11 @@ public class ProcessListController {
             courseMap.put("courseImg", course.getCourseImg());
 
             // 책임자 정보 가져오기
-            ProcessListUser officer = processListUsers.get(0);
-            courseMap.put("courseOfficerSessionId", officer.getSessionId());
-            courseMap.put("courseOfficerUserName", officer.getUserName());
+            // ProcessListUser officer = processListUsers.get(0);
+            // courseMap.put("courseOfficerSessionId", officer.getSessionId());
+            // courseMap.put("courseOfficerUserName", officer.getUserName());
+            courseMap.put("courseOfficerSessionId", processListUsers.get().getSessionId());
+            courseMap.put("courseOfficerUserName", processListUsers.get().getUserName());
 
             // 결과를 리스트에 추가
             resultList.add(courseMap);
@@ -186,26 +189,32 @@ public class ProcessListController {
 
                                 for(ProcessListOfferedSubjects offeredSubject : offeredSubjects){
 
-                                    // UserOwnAssigment 사용자 세션아이디, 개설과목코드 저장
-                                    ProcessListUserOwnAssignment userOwnAssignment = ProcessListUserOwnAssignment.builder()
-                                    .userSessionId(sessionId)
-                                    .offeredSubjectsId(offeredSubject.getOfferedSubjectsId())
-                                    .build();
-                                    processListUserOwnAssignmentRepository.save(userOwnAssignment);
+                                    // 사용자가 과목을 듣고 있는지 또는 과목을 수료했는지 확인
+                                    Optional<ProcessListUserOwnAssignment> userHaveOwnAssignment = processListUserOwnAssignmentRepository.findByOfferedSubjectsIdAndUserSessionId(offeredSubject.getOfferedSubjectsId(), sessionId);
 
-                                    // 개설과목 영상 확인
-                                    List<ProcessListSubjectOwnVideo> subjectOwnVideos = processListSubjectOwnVideoRepository.findBySovOfferedSubjectsId(offeredSubject.getOfferedSubjectsId());
+                                    if(userHaveOwnAssignment.isEmpty() || userHaveOwnAssignment.get().getSubjectAcceptCartegory().equals("T")){
 
-                                    for(ProcessListSubjectOwnVideo subjectOwnVideo : subjectOwnVideos){
-
-                                        // UserOwnSubjectVideo 사용자 세션아이디, 에피소드아이디, 개설과목코드
-                                        ProcessListUserOwnSubjectVideo userOwnSubjectVideo = ProcessListUserOwnSubjectVideo.builder()
-                                        .uosvSessionId(sessionId)
-                                        .uosvEpisodeId(subjectOwnVideo.getEpisodeId())
-                                        .uosvOfferedSubjectsId(subjectOwnVideo.getSovOfferedSubjectsId())
+                                        // UserOwnAssigment 사용자 세션아이디, 개설과목코드 저장
+                                        ProcessListUserOwnAssignment userOwnAssignment = ProcessListUserOwnAssignment.builder()
+                                        .userSessionId(sessionId)
+                                        .offeredSubjectsId(offeredSubject.getOfferedSubjectsId())
                                         .build();
-                                        processListUserOwnSubjectVideoRepository.save(userOwnSubjectVideo);
-
+                                        processListUserOwnAssignmentRepository.save(userOwnAssignment);
+    
+                                        // 개설과목 영상 확인
+                                        List<ProcessListSubjectOwnVideo> subjectOwnVideos = processListSubjectOwnVideoRepository.findBySovOfferedSubjectsId(offeredSubject.getOfferedSubjectsId());
+    
+                                        for(ProcessListSubjectOwnVideo subjectOwnVideo : subjectOwnVideos){
+    
+                                            // UserOwnSubjectVideo 사용자 세션아이디, 에피소드아이디, 개설과목코드
+                                            ProcessListUserOwnSubjectVideo userOwnSubjectVideo = ProcessListUserOwnSubjectVideo.builder()
+                                            .uosvSessionId(sessionId)
+                                            .uosvEpisodeId(subjectOwnVideo.getEpisodeId())
+                                            .uosvOfferedSubjectsId(subjectOwnVideo.getSovOfferedSubjectsId())
+                                            .build();
+                                            processListUserOwnSubjectVideoRepository.save(userOwnSubjectVideo);
+    
+                                        }
                                     }
                                 }
                             }

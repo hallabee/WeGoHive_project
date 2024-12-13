@@ -25,5 +25,8 @@ public class ProcessListUserOwnAssignment {
 
     @Column(name = "OFFERED_SUBJECTS_ID")
     private String offeredSubjectsId;
+
+    @Column(name = "SUBJECT_ACCEPT_CARTEGORY")
+    private String subjectAcceptCartegory;
     
 }

@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/course")
@@ -49,7 +50,8 @@ public class ProcessPursuitController {
             int studentCount = userCount.size();
 
             // 과정 책임자 정보 조회
-            List<ProcessPursuitUser> processPursuitUsers = processPursuitUserRepository.findBySessionId(course.getSessionId());
+            // List<ProcessPursuitUser> processPursuitUsers = processPursuitUserRepository.findBySessionId(course.getSessionId());
+            Optional<ProcessPursuitUser> processPursuitUsers = processPursuitUserRepository.findBySessionId(course.getSessionId());
 
             
             // 각 과정 정보와 수강자 수를 HashMap에 추가
@@ -61,9 +63,11 @@ public class ProcessPursuitController {
             courseMap.put("enrollEndDate", course.getEnrollEndDate());
             courseMap.put("studentCount", studentCount);
             // 책임자 정보 가져오기
-            ProcessPursuitUser officer = processPursuitUsers.get(0);
-            courseMap.put("courseOfficerSessionId", officer.getSessionId());
-            courseMap.put("courseOfficerUserName", officer.getUserName());
+            // ProcessPursuitUser officer = processPursuitUsers.get(0);
+            // courseMap.put("courseOfficerSessionId", officer.getSessionId());
+            // courseMap.put("courseOfficerUserName", officer.getUserName());
+            courseMap.put("courseOfficerSessionId", processPursuitUsers.get().getSessionId());
+            courseMap.put("courseOfficerUserName", processPursuitUsers.get().getUserName());
 
 
             // 결과를 리스트에 추가

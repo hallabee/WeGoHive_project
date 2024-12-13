@@ -51,21 +51,26 @@ public class QuestionBoardPostController {
         @RequestParam String postId
         ) {
 
+            // 수강생 권한 확인
             Optional<QuestionBoardPostUserOwnPermissionGroup> userOwnPermissionGroup = questionBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
 
+            // 수강생 권한 이름 확인
             Optional<QuestionBoardPostPermissionGroup> permissionGroup = questionBoardPostPermissionGroupRepository.findByPermissionGroupUuid(userOwnPermissionGroup.get().getPermissionGroupUuid2());
 
             String permissionName = permissionGroup.get().getPermissionName();
 
+            // 게시글글의 세션아이디를 확인하기 위함함
             Optional<QuestionBoardPostBoardPost> boardPost = questionBoardPostBoardPostRepository.findByPostId(postId);
 
             if(permissionName.equals("STUDENT")){
+                // 사용자의 세션 아이디와 게시글 작성자의 세션아이디가 같은지 확인하기 위함함
                 Optional<QuestionBoardPostBoardPost> userCheck = questionBoardPostBoardPostRepository.findBySessionIdAndPostId(sessionId, postId);
                 if(userCheck.isEmpty()){
                     return ResponseEntity.status(HttpStatus.CONFLICT).body("비밀글 입니다");
                 }
             }
 
+            // 해당 게시글의 댓글을 확인
             Optional<QuestionBoardPostComment> comment = questionBoardPostCommentRepository.findByPostId(boardPost.get().getPostId());
 
             if(boardPost.isPresent()){
