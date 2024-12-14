@@ -1,9 +1,12 @@
 package com.dev.restLms.model;
 
+import java.util.UUID;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,14 +19,19 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserOwnAssignment {
+public class UserOwnPermissionGroup {
 
     @Id
     private String increaseId;
 
-    private String userSessionId;
-    private String offeredSubjectsId;
-    private String subjectAcceptCartegory;
+    private String permissionGroupUuid2;
+    private String sessionId;
 
+    @PrePersist
+    public void generateUUID() {
+        if (increaseId == null) {
+            increaseId = UUID.randomUUID().toString();
+        }
+    }
     
 }

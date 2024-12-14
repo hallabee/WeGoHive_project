@@ -1,9 +1,12 @@
 package com.dev.restLms.model;
 
+import java.util.UUID;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,5 +40,12 @@ public class User {
     private String unsubscribe;
     private String fileNo;
     private String seqNo;
+
+    @PrePersist
+    public void generateUUID() {
+        if (sessionId == null) {
+            sessionId = UUID.randomUUID().toString();
+        }
+    }
     
 }

@@ -1,9 +1,12 @@
 package com.dev.restLms.model;
 
+import java.util.UUID;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,5 +29,12 @@ public class Subject {
     private String subjectCategory;
     private String subjectImageLink;
     private String subjectPromotion;
+
+    @PrePersist
+    public void generateUUID() {
+        if (subjectId == null) {
+            subjectId = UUID.randomUUID().toString();
+        }
+    }
     
 }

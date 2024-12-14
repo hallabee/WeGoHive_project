@@ -1,9 +1,12 @@
 package com.dev.restLms.model;
 
+import java.util.UUID;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,21 +19,21 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Course {
+public class OfferedSubjects {
 
     @Id
-    private String courseId;
+    private String offeredSubjectsId;
 
-    private String sessionId;
-    private String courseTitle;
-    private String courseBoundary;
-    private String courseCompleted;
-    private String courseCapacity;
-    private String courseProgressStatus;
-    private String courseStartDate;
-    private String courseEndDate;
-    private String enrollStartDate;
-    private String enrollEndDate;
-    private String courseImg;
+    private String courseId;
+    private String subjectId;
+    private String officerSessionId;
+    private String teacherSessionId;
+
+    @PrePersist
+    public void generateUUID() {
+        if (offeredSubjectsId == null) {
+            offeredSubjectsId = UUID.randomUUID().toString();
+        }
+    }
     
 }

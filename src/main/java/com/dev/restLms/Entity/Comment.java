@@ -1,9 +1,12 @@
 package com.dev.restLms.model;
 
+import java.util.UUID;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,19 +19,25 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BoardPost {
+public class Comment {
 
     @Id
-    private String postId;
+    private String commentId;
 
     private String authorNickname;
     private String createdDate;
-    private String title;
     private String content;
-    private String boardId;
+    private String rootCommentId;
+    private String postId;
     private String sessionId;
-    private String isNotice;
+    private String previousCommentId;
     private String isSecret;
-    private String fileNo;
+
+    @PrePersist
+    public void generateUUID() {
+        if (commentId == null) {
+            commentId = UUID.randomUUID().toString();
+        }
+    }
     
 }

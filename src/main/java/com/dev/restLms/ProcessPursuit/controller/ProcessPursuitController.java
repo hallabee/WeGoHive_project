@@ -64,9 +64,6 @@ public class ProcessPursuitController {
             courseMap.put("enrollEndDate", course.getEnrollEndDate());
             courseMap.put("studentCount", studentCount);
             // 책임자 정보 가져오기
-            // ProcessPursuitUser officer = processPursuitUsers.get(0);
-            // courseMap.put("courseOfficerSessionId", officer.getSessionId());
-            // courseMap.put("courseOfficerUserName", officer.getUserName());
             courseMap.put("courseOfficerSessionId", processPursuitUsers.get().getSessionId());
             courseMap.put("courseOfficerUserName", processPursuitUsers.get().getUserName());
 
