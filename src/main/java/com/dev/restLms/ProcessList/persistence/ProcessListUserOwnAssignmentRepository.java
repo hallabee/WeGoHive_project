@@ -4,11 +4,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.dev.restLms.ProcessList.model.ProcessListUserOwnAssignment;
+import com.dev.restLms.model.UserOwnAssignment;
 
 import java.util.List;
 
 
 @Repository
-public interface ProcessListUserOwnAssignmentRepository extends JpaRepository<ProcessListUserOwnAssignment, Object> {
+public interface ProcessListUserOwnAssignmentRepository extends JpaRepository<UserOwnAssignment, Object> {
     List<ProcessListUserOwnAssignment> findByOfferedSubjectsIdAndUserSessionId(String offeredSubjectsId, String userSessionId);
 }

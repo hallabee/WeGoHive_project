@@ -7,6 +7,7 @@ import com.dev.restLms.ProcessPursuit.model.ProcessPursuitUserOwnCourse;
 import com.dev.restLms.ProcessPursuit.persistence.ProcessPursuitCourseRepository;
 import com.dev.restLms.ProcessPursuit.persistence.ProcessPursuitUserOwnCourseRepository;
 import com.dev.restLms.ProcessPursuit.persistence.ProcessPursuitUserRepository;
+import com.dev.restLms.model.Course;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,12 +39,12 @@ public class ProcessPursuitController {
     @Operation(summary = "모든 과정 조회", description = "전체 과정 목록을 반환합니다.")
     public List<Map<String, Object>> getAllCoursesWithTeachers() {
         // 모든 과정 정보 가져오기
-        List<ProcessPursuitCourse> courses = courseRepository.findAll();
+        List<Course> courses = courseRepository.findAll();
         
         // 결과를 저장할 리스트
         List<Map<String, Object>> resultList = new ArrayList<>();
         
-        for (ProcessPursuitCourse course : courses) {
+        for (Course course : courses) {
             
             // 수강자 수 조회
             List<ProcessPursuitUserOwnCourse> userCount = processPursuitUserOwnCourseRepository.findByCourseId(course.getCourseId());

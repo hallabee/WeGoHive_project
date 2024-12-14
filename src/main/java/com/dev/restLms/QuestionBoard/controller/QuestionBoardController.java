@@ -159,7 +159,7 @@ public class QuestionBoardController {
         for (QuestionBoardPost post : questionBoardPosts) {
             Map<String, String> postMap = new HashMap<>();
             postMap.put("sessionId", post.getSessionId());
-            postMap.put("postId", post.getPostID());
+            postMap.put("postId", post.getPostId());
             postMap.put("title", post.getTitle());
             postMap.put("authorNickname", post.getAuthorNickname());
             postMap.put("createdDate", post.getCreatedDate());

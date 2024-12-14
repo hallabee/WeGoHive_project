@@ -7,9 +7,10 @@ import org.springframework.stereotype.Repository;
 
 import com.dev.restLms.QuestionBoard.model.QuestionBoardPost;
 // import java.util.List;
+import com.dev.restLms.model.BoardPost;
 
 @Repository
-public interface QuestionBoardPostRepository extends JpaRepository<QuestionBoardPost, String> {
+public interface QuestionBoardPostRepository extends JpaRepository<BoardPost, String> {
     // 기존 메서드
     // List<QuestionBoardPost> findByBoardId(String boardId);
 

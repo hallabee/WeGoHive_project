@@ -21,6 +21,10 @@ import com.dev.restLms.ProcessList.persistence.ProcessListUserOwnCourseRepositor
 import com.dev.restLms.ProcessList.persistence.ProcessListUserOwnPermissionGroupRepository;
 import com.dev.restLms.ProcessList.persistence.ProcessListUserOwnSubjectVideoRepository;
 import com.dev.restLms.ProcessList.persistence.ProcessListUserRepository;
+import com.dev.restLms.model.Course;
+import com.dev.restLms.model.UserOwnAssignment;
+import com.dev.restLms.model.UserOwnCourse;
+import com.dev.restLms.model.UserOwnSubjectVideo;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -83,12 +87,12 @@ public class ProcessListController {
         
         // 페이징 요청
         Pageable pageable = PageRequest.of(page, size);
-        Page<ProcessListCourse> coursePage = processListCourseRepository.findAll(pageable);
+        Page<Course> coursePage = processListCourseRepository.findAll(pageable);
         
         // 결과를 저장할 리스트
         List<Map<String, Object>> resultList = new ArrayList<>();
         
-        for (ProcessListCourse course : coursePage) {
+        for (Course course : coursePage) {
             // 수강자 수 조회
             List<ProcessListUserOwnCourse> userCount = processListUserOwnCourseRepository.findByCourseId(course.getCourseId());
             int studentCount = userCount.size();
@@ -162,7 +166,7 @@ public class ProcessListController {
 
                     // 듣고 있는 과정이 없을 때 실행행
                     if(userCourses){
-                        ProcessListUserOwnCourse postUserOwnCourse = ProcessListUserOwnCourse.builder()
+                        UserOwnCourse postUserOwnCourse = UserOwnCourse.builder()
                         .sessionId(sessionId)
                         .courseId(courseId)
                         .officerSessionId(officerSessionId)
@@ -190,7 +194,7 @@ public class ProcessListController {
                                     List<ProcessListUserOwnSubjectVideo> userOwnSubjectVideos = processListUserOwnSubjectVideoRepository.findByUosvSessionIdAndUosvOfferedSubjectsId(sessionId, offeredSubject.get().getOfferedSubjectsId());
 
                                     for(ProcessListUserOwnSubjectVideo userOwnSubjectVideo : userOwnSubjectVideos){
-                                        if(userOwnSubjectVideo.getProgress()<100){
+                                        if(  Integer.parseInt(userOwnSubjectVideo.getProgress())  <100){
                                             userSubject = false;
                                             break;
                                         }else{
@@ -200,7 +204,7 @@ public class ProcessListController {
                                 }
 
                                 if(userSubject){
-                                    ProcessListUserOwnAssignment postUserOwnAssignment = ProcessListUserOwnAssignment.builder()
+                                    UserOwnAssignment postUserOwnAssignment = UserOwnAssignment.builder()
                                     .userSessionId(sessionId)
                                     .offeredSubjectsId(offeredSubject.get().getOfferedSubjectsId())
                                     .build();
@@ -209,7 +213,7 @@ public class ProcessListController {
                                     // 해당 과목의 영상 목록 확인
                                     List<ProcessListSubjectOwnVideo> subjectOwnVideos = processListSubjectOwnVideoRepository.findBySovOfferedSubjectsId(offeredSubject.get().getOfferedSubjectsId());
                                     for(ProcessListSubjectOwnVideo subjectOwnVideo : subjectOwnVideos){
-                                        ProcessListUserOwnSubjectVideo postUserSubjectOwnVideo = ProcessListUserOwnSubjectVideo.builder()
+                                        UserOwnSubjectVideo postUserSubjectOwnVideo = UserOwnSubjectVideo.builder()
                                         .uosvSessionId(sessionId)
                                         .uosvEpisodeId(subjectOwnVideo.getEpisodeId())
                                         .uosvOfferedSubjectsId(subjectOwnVideo.getSovOfferedSubjectsId())

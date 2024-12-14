@@ -4,13 +4,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.dev.restLms.QuestionBoardPost.model.QuestionBoardPostBoardPost;
+import com.dev.restLms.model.BoardPost;
+
 // import java.util.List;
 import java.util.Optional;
 
 
 
 @Repository
-public interface QuestionBoardPostBoardPostRepository extends JpaRepository<QuestionBoardPostBoardPost, String> {
+public interface QuestionBoardPostBoardPostRepository extends JpaRepository<BoardPost, String> {
     Optional<QuestionBoardPostBoardPost> findBySessionId(String sessionId);
 
     Optional<QuestionBoardPostBoardPost> findByPostId(String postId);
