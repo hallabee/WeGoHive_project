@@ -1,10 +1,8 @@
-package com.dev.restLms.model;
+package com.dev.restLms.Entity;
 
 import java.util.UUID;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import lombok.AllArgsConstructor;
@@ -26,7 +24,7 @@ public class UserOwnAssignment {
 
     private String userSessionId;
     private String offeredSubjectsId;
-    private String subjectAcceptCartegory;
+    private String subjectAcceptCategory;
 
     @PrePersist
     public void generateUUID() {
