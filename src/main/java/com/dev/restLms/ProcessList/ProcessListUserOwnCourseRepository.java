@@ -3,7 +3,7 @@ package com.dev.restLms.ProcessList;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.dev.restLms.entity.UserOwnCourse;
+import com.dev.restLms.Entity.UserOwnCourse;
 
 import java.util.List;
 import java.util.Optional;

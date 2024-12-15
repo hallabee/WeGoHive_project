@@ -2,10 +2,10 @@
 package com.dev.restLms.ProcessList;
 
 
-import com.dev.restLms.entity.Course;
-import com.dev.restLms.entity.UserOwnAssignment;
-import com.dev.restLms.entity.UserOwnCourse;
-import com.dev.restLms.entity.UserOwnSubjectVideo;
+import com.dev.restLms.Entity.Course;
+import com.dev.restLms.Entity.UserOwnAssignment;
+import com.dev.restLms.Entity.UserOwnCourse;
+import com.dev.restLms.Entity.UserOwnSubjectVideo;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

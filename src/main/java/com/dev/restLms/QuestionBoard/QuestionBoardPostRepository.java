@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 
 
 // import java.util.List;
-import com.dev.restLms.entity.BoardPost;
+import com.dev.restLms.Entity.BoardPost;
 
 @Repository
 public interface QuestionBoardPostRepository extends JpaRepository<BoardPost, String> {

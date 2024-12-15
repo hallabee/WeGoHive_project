@@ -1,7 +1,7 @@
 // ProcessPursuitController.java
 package com.dev.restLms.ProcessPursuit;
 
-import com.dev.restLms.entity.Course;
+import com.dev.restLms.Entity.Course;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

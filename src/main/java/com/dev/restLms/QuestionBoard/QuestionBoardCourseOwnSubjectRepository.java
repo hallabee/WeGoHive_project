@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 
-import com.dev.restLms.entity.CourseOwnSubject;
+import com.dev.restLms.Entity.CourseOwnSubject;
 
 import java.util.Optional;
 

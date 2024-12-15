@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 
-import com.dev.restLms.entity.UserOwnAssignment;
+import com.dev.restLms.Entity.UserOwnAssignment;
 
 import java.util.Optional;
 
