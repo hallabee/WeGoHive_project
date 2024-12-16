@@ -2,7 +2,7 @@ package com.dev.restLms.userSubjects;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.dev.restLms.Entity.UserOwnSubjectVideo;
+import com.dev.restLms.entity.UserOwnSubjectVideo;
 
 import java.util.Optional;
 

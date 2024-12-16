@@ -2,7 +2,7 @@ package com.dev.restLms.userSubjects;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.dev.restLms.Entity.OfferedSubjects;
+import com.dev.restLms.entity.OfferedSubjects;
 
 import java.util.Optional;
 

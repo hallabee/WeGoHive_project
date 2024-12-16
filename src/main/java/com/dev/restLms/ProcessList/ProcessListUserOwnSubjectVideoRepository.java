@@ -3,7 +3,7 @@ package com.dev.restLms.ProcessList;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.dev.restLms.Entity.UserOwnSubjectVideo;
+import com.dev.restLms.entity.UserOwnSubjectVideo;
 
 import java.util.List;
 

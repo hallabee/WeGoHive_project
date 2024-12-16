@@ -3,8 +3,7 @@ package com.dev.restLms.QuestionBoard;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-
-import com.dev.restLms.Entity.OfferedSubjects;
+import com.dev.restLms.entity.OfferedSubjects;
 
 import java.util.Optional;
 

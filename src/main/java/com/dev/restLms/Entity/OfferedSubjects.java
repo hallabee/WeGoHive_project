@@ -1,4 +1,4 @@
-package com.dev.restLms.Entity;
+package com.dev.restLms.entity;
 
 import java.util.UUID;
 

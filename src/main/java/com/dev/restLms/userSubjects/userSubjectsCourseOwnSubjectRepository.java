@@ -2,7 +2,7 @@ package com.dev.restLms.userSubjects;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.dev.restLms.Entity.CourseOwnSubject;
+import com.dev.restLms.entity.CourseOwnSubject;
 
 import java.util.Optional;
 
