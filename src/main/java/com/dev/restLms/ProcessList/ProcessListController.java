@@ -62,7 +62,7 @@ public class ProcessListController {
 
     @GetMapping("/allTitles")
     @Operation(summary = "모든 과정 조회", description = "전체 과정 목록을 반환합니다.")
-    public List<Map<String, Object>> getAllCoursesWithOfficer(
+    public ResponseEntity<?> getAllCoursesWithOfficer(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         
@@ -95,11 +95,21 @@ public class ProcessListController {
             courseMap.put("courseOfficerSessionId", processListUsers.get().getSessionId());
             courseMap.put("courseOfficerUserName", processListUsers.get().getUserName());
 
+            // 총 과정 수
+            // courseMap.put("courseSize", processListCourseRepository.findAll().size());
+
             // 결과를 리스트에 추가
             resultList.add(courseMap);
         }
 
-        return resultList;
+        // return resultList;
+        Map<String, Object> response = new HashMap<>();
+        response.put("courses", resultList);
+        response.put("currentPage", coursePage.getNumber());
+        response.put("totalItems", coursePage.getTotalElements());
+        response.put("totalPages", coursePage.getTotalPages());
+
+        return ResponseEntity.ok().body(response);
     }
 
     @PostMapping("/registerCourse")
