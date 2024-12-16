@@ -1,5 +1,7 @@
 package com.dev.restLms.QuestionBoardPost;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,11 +14,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dev.restLms.entity.BoardPost;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 
 @RestController
@@ -99,6 +105,29 @@ public class QuestionBoardPostController {
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body("비밀글 입니다.");
     }
+
+    @PostMapping()
+    public ResponseEntity<?> sendBoardPost(
+    @RequestParam String sessionId,
+    @RequestParam String boardId,    
+    @RequestBody BoardPost userBoardPost) {
+
+        userBoardPost.setSessionId(sessionId);
+        userBoardPost.setBoardId(boardId);
+        userBoardPost.setPostId(null);
+        if(userBoardPost.getIsNotice().equals("true")){
+            userBoardPost.setIsNotice("T");
+        }else{
+            userBoardPost.setIsNotice("F");
+        }
+        userBoardPost.setCreatedDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
+        userBoardPost.setFileNo(null); // 일단 널값으로 지정 추후 변경 예정
+
+        BoardPost savePost = questionBoardPostBoardPostRepository.save(userBoardPost);
+        
+        return ResponseEntity.ok().body(savePost);
+    }
+    
     
     
 }

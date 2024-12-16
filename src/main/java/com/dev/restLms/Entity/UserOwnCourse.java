@@ -33,5 +33,4 @@ public class UserOwnCourse {
             increaseId = UUID.randomUUID().toString();
         }
     }
-    
 }

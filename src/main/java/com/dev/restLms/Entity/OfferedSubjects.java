@@ -6,7 +6,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,22 +15,19 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class OfferedSubjects {
-
     @Id
     private String offeredSubjectsId;
-
     private String courseId;
     private String subjectId;
     private String officerSessionId;
     private String teacherSessionId;
 
-    @PrePersist
-    public void generateUUID() {
-        if (offeredSubjectsId == null) {
-            offeredSubjectsId = UUID.randomUUID().toString();
-        }
-    }
     
+  @PrePersist
+  public void generateUUID() {
+      if (offeredSubjectsId == null) {
+        offeredSubjectsId = UUID.randomUUID().toString();
+      }
+  }
 }

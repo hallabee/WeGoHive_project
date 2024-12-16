@@ -36,9 +36,9 @@ public class Course {
 
     @PrePersist
     public void generateUUID() {
-        if (sessionId == null) {
-            sessionId = UUID.randomUUID().toString();
+        if (courseId == null) {
+            courseId = UUID.randomUUID().toString();
         }
     }
-    
+
 }

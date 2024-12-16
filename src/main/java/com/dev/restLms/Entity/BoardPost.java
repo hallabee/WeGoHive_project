@@ -29,7 +29,6 @@ public class BoardPost {
     private String boardId;
     private String sessionId;
     private String isNotice;
-    private String isSecret;
     private String fileNo;
 
     @PrePersist
@@ -38,5 +37,4 @@ public class BoardPost {
             postId = UUID.randomUUID().toString();
         }
     }
-    
 }

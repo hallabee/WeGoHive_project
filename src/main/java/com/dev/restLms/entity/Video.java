@@ -13,19 +13,20 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-public class SubjectOwnVideo {
+@NoArgsConstructor
+public class Video {
   @Id
-  private String episodeId;
-  private String sovOfferedSubjectsId;
-  private String videoSortIndex;
-  private String sovVideoId;
+  private String videoId;
+  private String max;
+  private String videoTitle;
+  private String videoLink;
+  private String videoImg;
 
   @PrePersist
   public void generateUUID() {
-      if (episodeId == null) {
-        episodeId = UUID.randomUUID().toString();
+      if (videoId == null) {
+        videoId = UUID.randomUUID().toString();
       }
   }
 }

@@ -6,7 +6,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,12 +15,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Subject {
 
     @Id
     private String subjectId;
-
     private String subjectName;
     private String subjectDesc;
     private String subjectCategory;
@@ -34,5 +31,4 @@ public class Subject {
             subjectId = UUID.randomUUID().toString();
         }
     }
-    
 }

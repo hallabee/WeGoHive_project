@@ -25,7 +25,6 @@ public class Board {
     private String boardCategory;
     private String teacherSessionId;
     private String offeredSubjectsId;
-    
 
     @PrePersist
     public void generateUUID() {
@@ -33,6 +32,4 @@ public class Board {
             boardId = UUID.randomUUID().toString();
         }
     }
-
-    
 }

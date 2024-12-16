@@ -2,6 +2,7 @@ package com.dev.restLms.entity;
 
 import java.util.UUID;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
@@ -12,27 +13,26 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@Builder
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@NoArgsConstructor
 public class UserOwnSubjectVideo {
+  @Id
+  private String increaseId;
+  private String uosvSessionId;
+  private String uosvEpisodeId;
+  private String uosvOfferedSubjectsId;
+  private String progress;
 
-    @Id
-    private String increaseId;
+  @Column(name = "final")
+  private String uosvFinal;
 
-    private String uosvSessionId;
-    private String uosvEpisodeId;
-    private String uosvOfferedSubjectsId;
-    private String progress;
-    private String uosvFinal;
-
-    @PrePersist
-    public void generateUUID() {
-        if (increaseId == null) {
-            increaseId = UUID.randomUUID().toString();
-        }
-    }
-    
+  @PrePersist
+  public void generateUUID() {
+      if (increaseId == null) {
+        increaseId = UUID.randomUUID().toString();
+      }
+  }
 }

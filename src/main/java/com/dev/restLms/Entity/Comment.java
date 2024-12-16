@@ -37,5 +37,4 @@ public class Comment {
             commentId = UUID.randomUUID().toString();
         }
     }
-    
 }

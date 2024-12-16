@@ -6,7 +6,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,14 +15,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class UserOwnPermissionGroup {
-
     @Id
-    private String increaseId;
-
-    private String permissionGroupUuid2;
-    private String sessionId;
+    String increaseId;
+    String permissionGroupUuid2;
+    String sessionId;
 
     @PrePersist
     public void generateUUID() {
@@ -31,5 +27,4 @@ public class UserOwnPermissionGroup {
             increaseId = UUID.randomUUID().toString();
         }
     }
-    
 }
