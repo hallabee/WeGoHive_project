@@ -18,4 +18,6 @@ public interface announcementBoardPost {
 
     String getIsNotice();
 
+    String getFileNo();
+
 }

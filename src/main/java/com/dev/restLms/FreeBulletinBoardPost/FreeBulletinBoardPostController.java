@@ -2,15 +2,22 @@ package com.dev.restLms.FreeBulletinBoardPost;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.dev.restLms.entity.BoardPost;
 import com.dev.restLms.entity.Comment;
+import com.dev.restLms.entity.FileInfo;
 import com.dev.restLms.entity.UserOwnPermissionGroup;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -18,16 +25,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 
 
@@ -51,44 +64,175 @@ public class FreeBulletinBoardPostController {
     @Autowired
     FreeBulletinBoardPostPermissionGroupRepository freeBulletinBoardPostPermissionGroupRepository;
 
+    @Autowired
+    FreeBulletinBoardPostFileInfoRepository freeBulletinBoardPostFileInfoRepository;
+
+    private static final String ROOT_DIR = "src/main/resources/static";
+    private static final String UPLOAD_DIR = "Board/";
+    private static final String BOARD_DIR = "BulletinBoard/";
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB (바이트 단위)
+
     @PostMapping("/post")
     @Operation(summary = "자유게시판 게시글 작성", description = "자유게시판에서 게시글을 작성합니다.")
     public ResponseEntity<?> postBoardPost(
         @RequestParam String sessionId,
         @RequestParam String boardId,
-        @RequestBody BoardPost userBoardPost
+        @RequestPart("userBoardPost") BoardPost userBoardPost,
+        @RequestPart("file") MultipartFile file
         ) {
 
-            Optional<UserOwnPermissionGroup> user = freeBulletinBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
+            try {
 
-            if(user.isPresent()){
+                Optional<UserOwnPermissionGroup> user = freeBulletinBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
+    
+                if(user.isPresent()){
+
+                    if(file != null && !"no-file".equals(file.getOriginalFilename())){
+
+                        // 파일 크기 확인 
+                        if(file.getSize() > MAX_FILE_SIZE){
+                            return ResponseEntity.status(HttpStatus.CONFLICT).body("파일 크기 초과");
+                        }
+        
+                        // 파일 정보 저장 
+                        Map<String, Object> result = saveFile(file, userBoardPost);
+                        Path path = (Path) result.get("path");
+                        String uniqueFileName = (String) result.get("uniqueFileName");
+
+                        // 파일의 마지막 경로 (파일명 + 확장자 전까지 저장)
+                        String filePath = path.toString().substring(0, path.toString().lastIndexOf("\\")+1);
+                        // 고유한 파일 번호 생성 
+                        String fileNo = UUID.randomUUID().toString();
+                        FileInfo fileInfo = FileInfo.builder()
+                        .fileNo(fileNo)
+                        .fileSize(Long.toString(file.getSize()))
+                        .filePath(filePath)
+                        .orgFileNm(file.getOriginalFilename())
+                        .encFileNm(uniqueFileName)
+                        .uploadDt(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
+                        .uploaderSessionId(sessionId)
+                        .build();
+                        freeBulletinBoardPostFileInfoRepository.save(fileInfo);
+
+                        userBoardPost.setFileNo(fileNo);
+
+                    }else{
+                        userBoardPost.setFileNo(null);
+                    }
+                    
+                    // 작성자의 닉네임 확인 
+                    Optional<FreeBulletinBoardPostUser> findUserNickName = freeBulletinBoardPostUserRepository.findBySessionId(sessionId);
+        
+                    userBoardPost.setAuthorNickname(findUserNickName.get().getNickname());
+                    // PostId는 UUID로 자동 할당받기 때문에 null로 삽입 
+                    userBoardPost.setPostId(null);
+                    userBoardPost.setSessionId(sessionId);
+                    userBoardPost.setBoardId(boardId);
+                    userBoardPost.setCreatedDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
+                    // 공지사항이면 T 아니면 F 
+                    if(userBoardPost.getIsNotice().equals("true")){
+                        userBoardPost.setIsNotice("T");
+                    }else{
+                        userBoardPost.setIsNotice("F");
+                    }
+        
+                    BoardPost savePost = freeBulletinBoardPostRepository.save(userBoardPost);
                 
-                // 작성자의 닉네임 확인 
-                Optional<FreeBulletinBoardPostUser> findUserNickName = freeBulletinBoardPostUserRepository.findBySessionId(sessionId);
+                    return ResponseEntity.ok().body(savePost);
     
-                userBoardPost.setAuthorNickname(findUserNickName.get().getNickname());
-                // PostId는 UUID로 자동 할당받기 때문에 null로 삽입 
-                userBoardPost.setPostId(null);
-                userBoardPost.setSessionId(sessionId);
-                userBoardPost.setBoardId(boardId);
-                userBoardPost.setCreatedDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
-                // 공지사항이면 T 아니면 F 
-                if(userBoardPost.getIsNotice().equals("true")){
-                    userBoardPost.setIsNotice("T");
-                }else{
-                    userBoardPost.setIsNotice("F");
                 }
-                // 파일 첨부는 일단 보류 
-                userBoardPost.setFileNo(null);
     
-                BoardPost savePost = freeBulletinBoardPostRepository.save(userBoardPost);
-            
-            return ResponseEntity.ok().body(savePost);
-
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("로그인 후 사용 가능");
+                
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("파일 업로드 실패" + e.getMessage());
             }
 
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("로그인 후 사용 가능");
 
+    }
+
+    private Map<String, Object> saveFile(MultipartFile file, BoardPost userBoardPost) throws Exception{
+
+        // 원본 파일명에서 확장자 추출 
+        String originalFilename = file.getOriginalFilename();
+        String fileExtension = ""; // . 부터 시작하는 확장자를 담는 변수
+
+        if(originalFilename != null){
+            fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+
+        // 고유 파일명 생성 
+        String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
+
+        // 저장 경로
+        Path path = Paths.get(ROOT_DIR + UPLOAD_DIR + BOARD_DIR + uniqueFileName);
+
+        // 파일이 존재하지 않으면 생성 
+        Files.createDirectories(path.getParent());
+
+        // 파일 저장 
+        byte[] bytes = file.getBytes();
+        Files.write(path, bytes);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("path", path);
+        result.put("uniqueFileName", uniqueFileName);
+
+        return result;
+    }
+
+    // 이미지 반환 
+    @GetMapping("/images/{fileNo:.+}")
+    public ResponseEntity<Resource> getImage(@PathVariable String fileNo) {
+        try {
+            Optional<FileInfo> fileInfoOptional = freeBulletinBoardPostFileInfoRepository.findByFileNo(fileNo);
+            if (!fileInfoOptional.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+
+            FileInfo fileInfo = fileInfoOptional.get();
+            Path filePath = Paths.get(fileInfo.getFilePath() + fileInfo.getEncFileNm());
+            Resource resource = new UrlResource(filePath.toUri());
+
+            if (resource.exists() || resource.isReadable()) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_JPEG) // 이미지 형식에 맞게 설정
+                        .body(resource);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    // 파일 다운로드 반환 
+    @GetMapping("/download/{fileNo}")
+    public ResponseEntity<Resource> downloadFile(@PathVariable String fileNo) {
+        try {
+            // 파일 정보 조회
+            Optional<FileInfo> fileInfoOptional = freeBulletinBoardPostFileInfoRepository.findByFileNo(fileNo);
+            
+            if (fileInfoOptional.isPresent()) {
+                FileInfo fileInfo = fileInfoOptional.get();
+                Path filePath = Paths.get(fileInfo.getFilePath() + fileInfo.getEncFileNm());
+                Resource resource = new UrlResource(filePath.toUri());
+
+                if (resource.exists() || resource.isReadable()) {
+                    // 파일을 다운로드할 수 있도록 ResponseEntity에 설정
+                    return ResponseEntity.ok()
+                            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileInfo.getOrgFileNm() + "\"")
+                            .body(resource);
+                } else {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+                }
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
+        }
     }
 
     @PostMapping("/comment")
@@ -193,17 +337,19 @@ public class FreeBulletinBoardPostController {
         @RequestParam String postId,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "5") int size
-        ) {
-
+    ) {
+        try {
             Optional<UserOwnPermissionGroup> user = freeBulletinBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
-
-            if(user.isPresent()){
-
+    
+            if (user.isPresent()) {
                 // 해당 게시글 내용 확인 
                 Optional<FreeBulletinBoardPosts> boardPost = freeBulletinBoardPostRepository.findByPostId(postId);
-
+    
+                if (!boardPost.isPresent()) {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("게시글을 찾을 수 없습니다.");
+                }
+    
                 Map<String, Object> resuList = new HashMap<>();
-
                 HashMap<String, Object> posts = new HashMap<>();
                 posts.put("postSessionId", boardPost.get().getSessionId());
                 posts.put("postId", boardPost.get().getPostId());
@@ -211,17 +357,26 @@ public class FreeBulletinBoardPostController {
                 posts.put("postCreatedDate", boardPost.get().getCreatedDate());
                 posts.put("postTitle", boardPost.get().getTitle());
                 posts.put("postContent", boardPost.get().getContent());
-
+    
+                // 파일 정보 추가 
+                Optional<FileInfo> fileinfoOptional = freeBulletinBoardPostFileInfoRepository.findByFileNo(boardPost.get().getFileNo());
+                if (fileinfoOptional.isPresent()) {
+                    FileInfo fileInfo = fileinfoOptional.get();
+                    posts.put("fileNo", fileInfo.getFileNo());
+                    posts.put("orgFileNm", fileInfo.getOrgFileNm());
+                    // 파일의 다운로드 URL을 추가
+                    String fileDownloadUrl = "/download/" + fileInfo.getFileNo(); // 다운로드 API URL
+                    posts.put("fileDownloadUrl", fileDownloadUrl);
+                }
+    
                 resuList.put("post", posts);
-
+    
                 // 해당 게시글의 부모댓글들 확인 
                 Pageable pageable = PageRequest.of(page, size);
                 Page<Comment> comments = freeBulletinBoardPostCommentRepository.findByPostIdAndPreviousCommentId(postId, null, pageable);
-
+    
                 List<Map<String, Object>> userComments = new ArrayList<>();
-
-                for(Comment comment : comments){
-
+                for (Comment comment : comments) {
                     HashMap<String, Object> userComment = new HashMap<>();
                     userComment.put("commentId", comment.getCommentId());
                     userComment.put("commentAuthorNickname", comment.getAuthorNickname());
@@ -229,25 +384,28 @@ public class FreeBulletinBoardPostController {
                     userComment.put("comment", comment.getContent());
                     userComment.put("commentSessionId", comment.getSessionId());
                     userComment.put("isSecret", comment.getIsSecret());
-                    
                     userComments.add(userComment);
-
                 }
-
+    
                 resuList.put("comments", userComments);
-
+    
                 Map<String, Object> response = new HashMap<>();
                 response.put("postAndComment", resuList);
                 response.put("currentPage", comments.getNumber());
                 response.put("totalItems", comments.getTotalElements());
                 response.put("totalPages", comments.getTotalPages());
-
+    
                 return ResponseEntity.ok().body(response);
-
+    
             }
-            
-        return ResponseEntity.status(HttpStatus.CONFLICT).body("로그인 후 접속 가능");
+    
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("로그인 후 접속 가능");
+    
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("오류 발생: " + e.getMessage());
+        }
     }
+    
 
     @GetMapping("/reply")
     @Operation(summary = "자유게시판 댓글의 대댓글 확인", description = "자유게시판의 대댓글 목록을 가져옵니다.")
@@ -321,6 +479,30 @@ public class FreeBulletinBoardPostController {
 
             if(findUser.get().getSessionId().equals(sessionId) || permissionName.equals("OFFICER") || permissionName.equals("SITE_OFFICER")){
 
+                // 게시글 삭제시 게시글에 포함된 댓글들도 전부 삭제하기 위함 
+                List<Comment> deleteComments = freeBulletinBoardPostCommentRepository.findByPostId(postId);
+                for(Comment deleteComment : deleteComments){
+                    freeBulletinBoardPostCommentRepository.deleteById(deleteComment.getCommentId());
+                }
+
+                 // 파일 삭제
+                String fileNo = findUser.get().getFileNo();
+                if (fileNo != null) {
+                    Optional<FileInfo> fileInfoOptional = freeBulletinBoardPostFileInfoRepository.findByFileNo(fileNo);
+                    if (fileInfoOptional.isPresent()) {
+                        FileInfo fileInfo = fileInfoOptional.get();
+                        Path filePath = Paths.get(fileInfo.getFilePath() + fileInfo.getEncFileNm());
+                        try {
+                             // 파일 시스템에서 파일 삭제
+                            Files.deleteIfExists(filePath);
+                        } catch (IOException e) {
+                            return ResponseEntity.status(HttpStatus.CONFLICT).body("파일 삭제 실패: " + e.getMessage());
+                        }
+                    }
+                    // 파일 정보 삭제
+                    freeBulletinBoardPostFileInfoRepository.deleteById(fileNo); 
+                }
+
                 freeBulletinBoardPostRepository.deleteById(postId);
                 return ResponseEntity.ok().body("삭제 완료");
 
@@ -356,4 +538,121 @@ public class FreeBulletinBoardPostController {
         
         return ResponseEntity.status(HttpStatus.CONFLICT).body("권한이 없습니다.");
     }
+
+    @PostMapping("/postUpdate")
+    @Operation(summary = "자유게시판 게시글 수정", description = "자유게시판을 수정합니다")
+    public ResponseEntity<?> UpdateBullentinBoard(
+        @RequestBody String sessionId,
+        @RequestParam String postId,
+        @RequestPart("file") MultipartFile file,
+        @RequestPart("bullentinUpdatePost") BoardPost bullentinUpdatePost
+        ) {
+
+            try {
+                
+                Optional<FreeBulletinBoardPosts> findPostSessionId = freeBulletinBoardPostRepository.findByPostId(postId);
+                
+                Optional<UserOwnPermissionGroup> findUser = freeBulletinBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
+
+                if(findUser.isEmpty()){
+                    return ResponseEntity.status(HttpStatus.CONFLICT).body("잘못된 접근입니다.");
+                }
+                
+                Optional<FreeBulletinBoardPostPermissionGroup> findUserPermissionName = freeBulletinBoardPostPermissionGroupRepository.findByPermissionGroupUuid(findUser.get().getPermissionGroupUuid2());
+                
+                String permissionName = findUserPermissionName.get().getPermissionName();
+                
+                if(findPostSessionId.get().equals(sessionId) || permissionName.equals("OFFICER") || permissionName.equals("SITE_OFFICER")){
+
+                    Optional<FreeBulletinBoardPostUser> findUserNickName = freeBulletinBoardPostUserRepository.findBySessionId(sessionId);
+
+                    Optional<BoardPost> updatePost = freeBulletinBoardPostRepository.findById(postId);
+
+                    if(updatePost.isPresent()){
+
+                        BoardPost postToUpdate = updatePost.get();
+                        postToUpdate.setAuthorNickname(findUserNickName.get().getNickname());
+                        postToUpdate.setSessionId(sessionId);
+                        postToUpdate.setCreatedDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
+                        if(bullentinUpdatePost.getIsNotice().equals("true")){
+                            postToUpdate.setIsNotice("T");
+                        }else{
+                            postToUpdate.setIsNotice("F");
+                        }
+                        postToUpdate.setTitle(bullentinUpdatePost.getTitle());
+                        postToUpdate.setContent(bullentinUpdatePost.getContent());
+
+                        // 파일 업데이트 로직 
+
+                        // 파일이 새로 업로드된 경우 처리 로직 
+                        if(file != null && !file.isEmpty() && !"no-file".equals(file.getOriginalFilename())){
+
+                            // 파일 크기 확인 
+                            if(file.getSize() > MAX_FILE_SIZE){
+                                return ResponseEntity.status(HttpStatus.CONFLICT).body("파일 크기 초과");
+                            }
+
+                            if(postToUpdate.getFileNo() != null){
+                                Optional<FileInfo> fileInfoOptional = freeBulletinBoardPostFileInfoRepository.findByFileNo(postToUpdate.getFileNo());
+                                if (fileInfoOptional.isPresent()) {
+                                    FileInfo fileInfo = fileInfoOptional.get();
+                                    Path filePath = Paths.get(fileInfo.getFilePath() + fileInfo.getEncFileNm());
+                                    
+                                    // 파일 삭제
+                                    try {
+                                        Files.deleteIfExists(filePath);
+                                    } catch (IOException e) {
+                                        return ResponseEntity.status(HttpStatus.CONFLICT).body("파일 삭제 실패: " + e.getMessage());
+                                    }
+
+                                    // 파일 정보 삭제
+                                    freeBulletinBoardPostFileInfoRepository.deleteById(postToUpdate.getFileNo());
+                                }
+                            }
+
+                            // 파일 저장 및 정보 업데이트 
+                            Map<String, Object> result = saveFile(file, postToUpdate);
+                            Path path = (Path) result.get("path");
+                            String uniqueFileName = (String) result.get("uniqueFileName");
+
+                            // 파일의 마지막 경로 (파일명 + 확장자 전까지 저장)
+                            String filePath = path.toString().substring(0, path.toString().lastIndexOf("\\")+1);
+                            // 고유한 파일 번호 생성 
+                            String fileNo = UUID.randomUUID().toString();
+                            FileInfo fileInfo = FileInfo.builder()
+                            .fileNo(fileNo)
+                            .fileSize(Long.toString(file.getSize()))
+                            .filePath(filePath)
+                            .orgFileNm(file.getOriginalFilename())
+                            .encFileNm(uniqueFileName)
+                            .uploadDt(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
+                            .uploaderSessionId(sessionId)
+                            .build();
+                            freeBulletinBoardPostFileInfoRepository.save(fileInfo);
+
+                            postToUpdate.setFileNo(fileNo);
+
+                        }else{
+                            postToUpdate.setFileNo(postToUpdate.getFileNo());
+                        }
+
+                        freeBulletinBoardPostRepository.save(postToUpdate);
+
+                        return ResponseEntity.ok().body("수정 완료");
+
+                    }
+
+                    return ResponseEntity.status(HttpStatus.CONFLICT).body("해당 게시물이 없습니다.");
+                    
+                }
+
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("권한이 없습니다.");
+                
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("오류 발생 : " + e.getMessage());
+            }
+        
+    }
+    
+
 }
