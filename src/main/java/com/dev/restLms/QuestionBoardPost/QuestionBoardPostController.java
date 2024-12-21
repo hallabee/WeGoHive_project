@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dev.restLms.entity.BoardPost;
+import com.dev.restLms.entity.Comment;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -41,6 +42,16 @@ public class QuestionBoardPostController {
 
     @Autowired
     private QuestionBoardPostUserOwnPermissionGroupRepository questionBoardPostUserOwnPermissionGroupRepository;
+
+    @Autowired
+    private QuestionBoardPostBoardRepository questionBoardPostBoardRepository;
+
+    @Autowired
+    private QuestionBoardPostUserOwnAssignmentRepository questionBoardPostUserOwnAssignmentRepository;
+
+    @Autowired
+    private QuestionBoardPostUserRepository questionBoardPostUserRepository;
+    
 
     @GetMapping("/boradPost")
     @Operation(summary = "사용자의 질문과 답변", description = "질문과 답변을 반환합니다")
@@ -106,28 +117,189 @@ public class QuestionBoardPostController {
         return ResponseEntity.status(HttpStatus.CONFLICT).body("비밀글 입니다.");
     }
 
-    @PostMapping()
-    public ResponseEntity<?> sendBoardPost(
-    @RequestParam String sessionId,
-    @RequestParam String boardId,    
-    @RequestBody BoardPost userBoardPost) {
+    @PostMapping("/post")
+    @Operation(summary = "질문 게시판 게시글 작성", description = "해당 과목의 질문 게시글을 작성합니다")
+    public ResponseEntity<?> postQustionBoard(
+        @RequestParam String sessionId,
+        @RequestParam String boardId,
+        @RequestBody BoardPost qustionBoardPost
+        ) {
 
-        userBoardPost.setSessionId(sessionId);
-        userBoardPost.setBoardId(boardId);
-        userBoardPost.setPostId(null);
-        if(userBoardPost.getIsNotice().equals("true")){
-            userBoardPost.setIsNotice("T");
-        }else{
-            userBoardPost.setIsNotice("F");
-        }
-        userBoardPost.setCreatedDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
-        userBoardPost.setFileNo(null); // 일단 널값으로 지정 추후 변경 예정
+            // 사용자 확인 
+            Optional<QuestionBoardPostUserOwnPermissionGroup> userCheck = questionBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
 
-        BoardPost savePost = questionBoardPostBoardPostRepository.save(userBoardPost);
-        
-        return ResponseEntity.ok().body(savePost);
+            if(userCheck.isEmpty()){
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("로그인 후 사용해 주세요");
+            }
+
+            // 사용자 권한 확인 
+            Optional<QuestionBoardPostPermissionGroup> permissionCheck = questionBoardPostPermissionGroupRepository.findByPermissionGroupUuid(userCheck.get().getPermissionGroupUuid2());
+            String userPerssionName = permissionCheck.get().getPermissionName();
+            
+            // 게시글의 개설과목 코드 확인 
+            Optional<QuestionBoardPostBoard>  findBoard = questionBoardPostBoardRepository.findByBoardId(boardId);
+
+            boolean permissionNameCheck = false;
+
+            if(userPerssionName.equals("OFFICER") || userPerssionName.equals("SITE_OFFICER")){
+                permissionNameCheck = true;
+            }
+
+            if(userPerssionName.equals("TEACHER")){
+                // 해당 과목의 강사인지 확인 
+                Optional<QuestionBoardPostBoard> findTeacher = questionBoardPostBoardRepository.findByTeacherSessionIdAndOfferedSubjectsId(sessionId, findBoard.get().getOfferedSubjectsId());
+
+                if(findTeacher.isPresent()){
+                    permissionNameCheck = true;
+                }
+
+            }
+
+            if(userPerssionName.equals("STUDENT")){
+                // 해당 과목의 학생인지 확인 
+                Optional<QuestionBoardPostUserOwnAssignment> findSudent = questionBoardPostUserOwnAssignmentRepository.findByUserSessionIdAndOfferedSubjectsId(sessionId, findBoard.get().getOfferedSubjectsId());
+
+                if(findSudent.isPresent()){
+                    permissionNameCheck = true;
+                }
+            }
+
+            if(permissionNameCheck){
+
+                Optional<QuestionBoardPostUser> findUserNickName = questionBoardPostUserRepository.findBySessionId(sessionId);
+
+                qustionBoardPost.setAuthorNickname(findUserNickName.get().getNickname());
+                qustionBoardPost.setPostId(null);
+                qustionBoardPost.setSessionId(sessionId);
+                qustionBoardPost.setBoardId(boardId);
+                qustionBoardPost.setCreatedDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
+                if(qustionBoardPost.getIsNotice().equals("true")){
+                    qustionBoardPost.setIsNotice("T");
+                }else{
+                    qustionBoardPost.setIsNotice("F");
+                }
+                qustionBoardPost.setFileNo(null);
+
+                BoardPost savePost = questionBoardPostBoardPostRepository.save(qustionBoardPost);
+
+                return ResponseEntity.ok().body(savePost);
+
+            }else{
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("권한이 없습니다.");
+            }
     }
-    
+
+    @PostMapping("/comment")
+    @Operation(summary = "질문게시판 게시글의 댓글 작성", description = "질문게시판의 게시글에서 댓글을 작성합니다.")
+    public ResponseEntity<?> postComment(
+        @RequestParam String sessionId,
+        @RequestParam String postId,
+        @RequestBody Comment postComment
+        ) {
+
+            Optional<QuestionBoardPostUserOwnPermissionGroup> userCheck = questionBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
+
+            Optional<QuestionBoardPostPermissionGroup> permissionCheck = questionBoardPostPermissionGroupRepository.findByPermissionGroupUuid(userCheck.get().getPermissionGroupUuid2());
+
+            String permissionName  = permissionCheck.get().getPermissionName();
+
+            if(permissionName.equals("TEACHER") || permissionName.equals("OFFICER") || permissionName.equals("SITE_OFFICER")){
+
+                Optional<QuestionBoardPostUser> findUserNickname = questionBoardPostUserRepository.findBySessionId(sessionId);
+
+                postComment.setAuthorNickname(findUserNickname.get().getNickname());
+                postComment.setCommentId(null);
+                postComment.setPostId(postId);
+                postComment.setCreatedDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
+                postComment.setIsSecret("F");
+                postComment.setPreviousCommentId(null);
+                postComment.setRootCommentId("null");
+
+                Comment saveComment = questionBoardPostCommentRepository.save(postComment);
+
+                return ResponseEntity.ok().body(saveComment);
+
+            }
+        
+        return ResponseEntity.status(HttpStatus.CONFLICT).body("권한이 없습니다.");
+    }
+
+    @PostMapping("/deletePost")
+    @Operation(summary = "질문게시판 게시글 삭제", description = "질문게시판의 게시글을 삭제합니다")
+    public ResponseEntity<?> deletePost(
+        @RequestParam String sessionId,
+        @RequestParam String postId
+        ) {
+
+            Optional<QuestionBoardPostBoardPost> findUser = questionBoardPostBoardPostRepository.findByPostId(postId);
+
+            Optional<QuestionBoardPostUserOwnPermissionGroup> findOfficer = questionBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
+
+            Optional<QuestionBoardPostPermissionGroup> findPermissionName = questionBoardPostPermissionGroupRepository.findByPermissionGroupUuid(findOfficer.get().getPermissionGroupUuid2());
+
+            String permissionName = findPermissionName.get().getPermissionName();
+
+            boolean permissionCheck = false;
+
+            if(permissionName.equals("OFFICER") || permissionName.equals("SITE_OFFICER")){
+                permissionCheck = true;
+            }
+
+            if(permissionName.equals("TEACHER")){
+
+                Optional<QuestionBoardPostBoardPost> findBoardId = questionBoardPostBoardPostRepository.findByPostId(postId);
+
+                Optional<QuestionBoardPostBoard> findTeacherSessionId = questionBoardPostBoardRepository.findByBoardId(findBoardId.get().getBoardId());
+
+                if(findTeacherSessionId.get().getTeacherSessionId().equals(sessionId)){
+                    permissionCheck = true;
+                }
+
+            }
+
+            if(findUser.get().getSessionId().equals(sessionId)){
+                permissionCheck = true;
+            }
+
+            if(permissionCheck){
+
+                Optional<QuestionBoardPostComment> deleteComment = questionBoardPostCommentRepository.findByPostId(postId);
+
+                questionBoardPostCommentRepository.deleteById(deleteComment.get().getCommentId());
+
+                questionBoardPostBoardPostRepository.deleteById(postId);
+                return ResponseEntity.ok().body("삭제 완료");
+
+            }else{
+
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("권한이 없습니다.");
+
+            }
+        
+    }
+
+    @PostMapping("/deleteComment")
+    @Operation(summary = "질문게시판 게시글의 댓글 삭제", description = "질문게시판의 게시글의 댓글을 삭제합니다")
+    public ResponseEntity<?> deleteComment(
+        @RequestParam String sessionId,
+        @RequestParam String commentId
+        ) {
+        
+            Optional<QuestionBoardPostUserOwnPermissionGroup> userCheck = questionBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
+
+            Optional<QuestionBoardPostPermissionGroup> permissionCheck = questionBoardPostPermissionGroupRepository.findByPermissionGroupUuid(userCheck.get().getPermissionGroupUuid2());
+
+            String permissionName  = permissionCheck.get().getPermissionName();
+
+            if(permissionName.equals("TEACHER") || permissionName.equals("OFFICER") || permissionName.equals("SITE_OFFICER")){
+
+                questionBoardPostCommentRepository.deleteById(commentId);
+                return ResponseEntity.ok().body("삭제 완료");
+
+            }
+        
+        return ResponseEntity.status(HttpStatus.CONFLICT).body("권한이 없습니다.");
+    }
     
     
 }

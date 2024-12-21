@@ -15,6 +15,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,6 +35,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -67,7 +70,7 @@ public class FreeBulletinBoardPostController {
     @Autowired
     FreeBulletinBoardPostFileInfoRepository freeBulletinBoardPostFileInfoRepository;
 
-    private static final String ROOT_DIR = "src/main/resources/static";
+    private static final String ROOT_DIR = "src/main/resources/static/";
     private static final String UPLOAD_DIR = "Board/";
     private static final String BOARD_DIR = "BulletinBoard/";
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB (바이트 단위)
@@ -219,10 +222,15 @@ public class FreeBulletinBoardPostController {
                 Resource resource = new UrlResource(filePath.toUri());
 
                 if (resource.exists() || resource.isReadable()) {
+
                     // 파일을 다운로드할 수 있도록 ResponseEntity에 설정
+                    String encodedFileName = URLEncoder.encode(fileInfo.getOrgFileNm(), StandardCharsets.UTF_8.toString());
                     return ResponseEntity.ok()
-                            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileInfo.getOrgFileNm() + "\"")
+                            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encodedFileName)
+                            .contentLength(Files.size(filePath)) // 파일 크기 설정
                             .body(resource);
+                            
                 } else {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
                 }
@@ -364,15 +372,22 @@ public class FreeBulletinBoardPostController {
                     FileInfo fileInfo = fileinfoOptional.get();
                     posts.put("fileNo", fileInfo.getFileNo());
                     posts.put("orgFileNm", fileInfo.getOrgFileNm());
-                    // 파일의 다운로드 URL을 추가
-                    String fileDownloadUrl = "/download/" + fileInfo.getFileNo(); // 다운로드 API URL
-                    posts.put("fileDownloadUrl", fileDownloadUrl);
+                    // 이미지 표시 URL 생성
+                    String orgFileNm = fileInfo.getOrgFileNm();
+                    if (orgFileNm != null && (orgFileNm.endsWith(".jpg") || orgFileNm.endsWith(".jpeg") || orgFileNm.endsWith(".png"))) {
+                        String imageUrl = fileInfo.getFileNo(); // 이미지 URL
+                        posts.put("imageUrl", imageUrl); // 이미지 URL 추가
+                    }else{
+                        // 파일 다운로드 URL 생성
+                        String fileDownloadUrl = fileInfo.getFileNo(); // 다운로드 API URL
+                        posts.put("fileDownloadUrl", fileDownloadUrl); // 다운로드 링크 추가
+                    }
                 }
     
                 resuList.put("post", posts);
     
                 // 해당 게시글의 부모댓글들 확인 
-                Pageable pageable = PageRequest.of(page, size);
+                Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
                 Page<Comment> comments = freeBulletinBoardPostCommentRepository.findByPostIdAndPreviousCommentId(postId, null, pageable);
     
                 List<Map<String, Object>> userComments = new ArrayList<>();
@@ -422,7 +437,7 @@ public class FreeBulletinBoardPostController {
             if(user.isPresent()){
 
                 // 해당 댓글의 대댓글 목록 확인 
-                Pageable pageable = PageRequest.of(page, size);
+                Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
                 Page<Comment> replyComments = freeBulletinBoardPostCommentRepository.findByRootCommentId(commentId, pageable);
     
                 List<Map<String, Object>> resultList = new ArrayList<>();

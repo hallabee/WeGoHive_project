@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -123,7 +124,7 @@ public class QuestionBoardController {
         List<Map<String, Object>> resultList = new ArrayList<>();
     
         // 페이징 처리된 게시글 가져오기
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<QuestionBoardPost> questionBoardPosts =
             questionBoardPostRepository.findByBoardId(questionBoard.get().getBoardId(), pageable);
     

@@ -1,6 +1,8 @@
 package com.dev.restLms.announcementPost;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -56,7 +58,7 @@ public class announcementPostController {
     @Autowired
     AnnouncementPostFileInfoRepository announcementPostFileInfoRepository;
 
-    private static final String ROOT_DIR = "src/main/resources/static";
+    private static final String ROOT_DIR = "src/main/resources/static/";
     private static final String UPLOAD_DIR = "Board/";
     private static final String BOARD_DIR = "NoticeBoard/";
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB (바이트 단위)
@@ -386,10 +388,15 @@ public class announcementPostController {
                 Resource resource = new UrlResource(filePath.toUri());
 
                 if (resource.exists() || resource.isReadable()) {
+
                     // 파일을 다운로드할 수 있도록 ResponseEntity에 설정
+                    String encodedFileName = URLEncoder.encode(fileInfo.getOrgFileNm(), StandardCharsets.UTF_8.toString());
                     return ResponseEntity.ok()
-                            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileInfo.getOrgFileNm() + "\"")
+                            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encodedFileName)
+                            .contentLength(Files.size(filePath)) // 파일 크기 설정
                             .body(resource);
+                            
                 } else {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
                 }
@@ -401,8 +408,6 @@ public class announcementPostController {
                     .body(null);
         }
     }
-
-    
 
     @PostMapping("postDelete")
     @Operation(summary = "공지사항 삭제", description = "공지사항을 삭제합니다")
