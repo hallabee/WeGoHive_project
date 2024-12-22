@@ -40,6 +40,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -85,6 +87,11 @@ public class FreeBulletinBoardPostController {
         ) {
 
             try {
+
+                // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                //                 .getContext().getAuthentication();
+                // // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                // String sessionId = auth.getPrincipal().toString();
 
                 Optional<UserOwnPermissionGroup> user = freeBulletinBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
     
@@ -251,6 +258,11 @@ public class FreeBulletinBoardPostController {
         @RequestBody Comment userComment
     ) {
 
+        // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+        //                         .getContext().getAuthentication();
+        //         // 유저 세션아이디 보안 컨텍스트에서 가져오기
+        //         String sessionId = auth.getPrincipal().toString();
+
         Optional<UserOwnPermissionGroup> user = freeBulletinBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
 
         if(user.isPresent()){
@@ -292,6 +304,11 @@ public class FreeBulletinBoardPostController {
         @RequestParam String commentId,
         @RequestBody Comment userCommentReply
         ) {
+
+            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+            //                     .getContext().getAuthentication();
+            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
+            //     String sessionId = auth.getPrincipal().toString();
 
             Optional<UserOwnPermissionGroup> user = freeBulletinBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
 
@@ -347,6 +364,12 @@ public class FreeBulletinBoardPostController {
         @RequestParam(defaultValue = "5") int size
     ) {
         try {
+
+            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+            //                     .getContext().getAuthentication();
+            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
+            //     String sessionId = auth.getPrincipal().toString();
+
             Optional<UserOwnPermissionGroup> user = freeBulletinBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
     
             if (user.isPresent()) {
@@ -431,6 +454,11 @@ public class FreeBulletinBoardPostController {
         @RequestParam(defaultValue = "6") int size
         ) {
 
+            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+            //                     .getContext().getAuthentication();
+            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
+            //     String sessionId = auth.getPrincipal().toString();
+
             // 사용자 확인 
             Optional<UserOwnPermissionGroup> user = freeBulletinBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
 
@@ -481,6 +509,12 @@ public class FreeBulletinBoardPostController {
         @RequestParam String sessionId,
         @RequestParam String postId
         ) {
+
+            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+            //                     .getContext().getAuthentication();
+            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
+            //     String sessionId = auth.getPrincipal().toString();
+
             // 삭제하려는 게시글의 사용자 세션아이디 확인 
             Optional<FreeBulletinBoardPosts> findUser = freeBulletinBoardPostRepository.findByPostId(postId);
 
@@ -532,6 +566,11 @@ public class FreeBulletinBoardPostController {
         @RequestParam String sessionId,
         @RequestParam String commentId
         ) {
+
+            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+            //                     .getContext().getAuthentication();
+            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
+            //     String sessionId = auth.getPrincipal().toString();
             
             // 삭제하려는 댓글의 사용자 세션 아이디 확인 
             Optional<Comment> findUser = freeBulletinBoardPostCommentRepository.findByCommentId(commentId);
@@ -564,6 +603,11 @@ public class FreeBulletinBoardPostController {
         ) {
 
             try {
+
+                // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                //                 .getContext().getAuthentication();
+                // // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                // String sessionId = auth.getPrincipal().toString();
                 
                 Optional<FreeBulletinBoardPosts> findPostSessionId = freeBulletinBoardPostRepository.findByPostId(postId);
                 

@@ -16,6 +16,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -119,6 +121,11 @@ public class ProcessListController {
         @RequestParam String courseId,
         @RequestParam String officerSessionId
     ) {
+
+        // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+        //                         .getContext().getAuthentication();
+        //         // 유저 세션아이디 보안 컨텍스트에서 가져오기
+        //         String sessionId = auth.getPrincipal().toString();
 
         // 사용자 권한 그룹에서 사용자 세션 아이디 확인
         Optional<ProcessListUserOwnPermissionGroup> userPermissionGroup = processListUserOwnPermissionGroupRepository.findBySessionId(sessionId);

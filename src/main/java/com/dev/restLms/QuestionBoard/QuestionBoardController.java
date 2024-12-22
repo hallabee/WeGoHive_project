@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -60,6 +62,11 @@ public class QuestionBoardController {
         @RequestParam(defaultValue = "10") int size
     ) {
 
+        // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+        //                         .getContext().getAuthentication();
+        //         // 유저 세션아이디 보안 컨텍스트에서 가져오기
+        //         String sessionId = auth.getPrincipal().toString();
+
         // 권한 확인
         Optional<QuestionBoardUserOwnPermissionGroup> userOwnPermissionGroup = questionBoardUserOwnPermissionGroupRepository.findBySessionId(sessionId);
 
@@ -76,7 +83,7 @@ public class QuestionBoardController {
             String permissionGroupName = permissionGroup.get().getPermissionName();
 
             switch (permissionGroupName) {
-                case "SITE_OFFICER", "OFFICER":
+                case "SITE_OFFICER" , "OFFICER":
                     Map<String, Object> response1 = saveboardPost(sessionId, offeredSubjectsId, page, size);
                     return ResponseEntity.ok().body(response1);
 

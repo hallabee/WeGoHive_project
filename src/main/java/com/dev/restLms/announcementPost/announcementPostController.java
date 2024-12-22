@@ -20,6 +20,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -73,6 +75,11 @@ public class announcementPostController {
         ) {
 
             try {
+
+                // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                //                 .getContext().getAuthentication();
+                // // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                // String sessionId = auth.getPrincipal().toString();
 
                  // 회원 확인 
                 Optional<UserOwnPermissionGroup> officerSessionIdCheck = announcementPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
@@ -194,6 +201,11 @@ public class announcementPostController {
 
             try {
 
+                // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                //                 .getContext().getAuthentication();
+                // // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                // String sessionId = auth.getPrincipal().toString();
+
                 Optional<UserOwnPermissionGroup> officerCheck = announcementPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
 
                 if(officerCheck.isPresent()){
@@ -303,6 +315,12 @@ public class announcementPostController {
         @RequestParam String postId
     ) {
         try {
+
+            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+            //                     .getContext().getAuthentication();
+            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
+            //     String sessionId = auth.getPrincipal().toString();
+
             Optional<UserOwnPermissionGroup> userCheck = announcementPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
     
             if (userCheck.isPresent()) {
@@ -416,6 +434,12 @@ public class announcementPostController {
         @RequestParam String postId 
     ) {
         try {
+
+            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+            //                     .getContext().getAuthentication();
+            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
+            //     String sessionId = auth.getPrincipal().toString();
+            
             // 사용자 권한 확인
             Optional<UserOwnPermissionGroup> officerOptional = announcementPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
             if (!officerOptional.isPresent()) {

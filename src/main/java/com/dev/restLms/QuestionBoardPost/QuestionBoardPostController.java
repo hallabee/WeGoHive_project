@@ -11,6 +11,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -60,6 +62,11 @@ public class QuestionBoardPostController {
         @RequestParam String postId
         ) {
 
+            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+            //                     .getContext().getAuthentication();
+            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
+            //     String sessionId = auth.getPrincipal().toString();
+
             // 수강생 권한 확인
             Optional<QuestionBoardPostUserOwnPermissionGroup> userOwnPermissionGroup = questionBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
 
@@ -86,6 +93,11 @@ public class QuestionBoardPostController {
 
                  // 결과를 저장할 리스트
                 List<Map<String, String>> resultList = new ArrayList<>();
+
+                HashMap<String, String> permission = new HashMap<>();
+                permission.put("SignInPermissionName", permissionName);
+
+                resultList.add(permission);
 
                 HashMap<String, String> posts = new HashMap<>();
                 posts.put("postSessionId", boardPost.get().getSessionId());
@@ -124,6 +136,11 @@ public class QuestionBoardPostController {
         @RequestParam String boardId,
         @RequestBody BoardPost qustionBoardPost
         ) {
+
+            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+            //                     .getContext().getAuthentication();
+            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
+            //     String sessionId = auth.getPrincipal().toString();
 
             // 사용자 확인 
             Optional<QuestionBoardPostUserOwnPermissionGroup> userCheck = questionBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
@@ -197,6 +214,11 @@ public class QuestionBoardPostController {
         @RequestBody Comment postComment
         ) {
 
+            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+            //                     .getContext().getAuthentication();
+            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
+            //     String sessionId = auth.getPrincipal().toString();
+
             Optional<QuestionBoardPostUserOwnPermissionGroup> userCheck = questionBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
 
             Optional<QuestionBoardPostPermissionGroup> permissionCheck = questionBoardPostPermissionGroupRepository.findByPermissionGroupUuid(userCheck.get().getPermissionGroupUuid2());
@@ -207,6 +229,7 @@ public class QuestionBoardPostController {
 
                 Optional<QuestionBoardPostUser> findUserNickname = questionBoardPostUserRepository.findBySessionId(sessionId);
 
+                postComment.setSessionId(sessionId);
                 postComment.setAuthorNickname(findUserNickname.get().getNickname());
                 postComment.setCommentId(null);
                 postComment.setPostId(postId);
@@ -230,6 +253,11 @@ public class QuestionBoardPostController {
         @RequestParam String sessionId,
         @RequestParam String postId
         ) {
+
+            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+            //                     .getContext().getAuthentication();
+            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
+            //     String sessionId = auth.getPrincipal().toString();
 
             Optional<QuestionBoardPostBoardPost> findUser = questionBoardPostBoardPostRepository.findByPostId(postId);
 
@@ -284,6 +312,11 @@ public class QuestionBoardPostController {
         @RequestParam String sessionId,
         @RequestParam String commentId
         ) {
+
+            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+            //                     .getContext().getAuthentication();
+            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
+            //     String sessionId = auth.getPrincipal().toString();
         
             Optional<QuestionBoardPostUserOwnPermissionGroup> userCheck = questionBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
 

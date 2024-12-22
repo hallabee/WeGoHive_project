@@ -58,7 +58,7 @@ public class announcementController {
             if(findBoardId.isPresent()){
 
                 // 공지사항 게시판 확인
-                Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDae"));
+                Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
                 Page<announcementBoardPost> findBoardPosts = announcementBoardPostRepository.findByBoardId(findBoardId.get().getBoardId(), pageable);
 
                 List<Map<String, Object>> resultList = new ArrayList<>();
@@ -103,7 +103,7 @@ public class announcementController {
         }
     
         // 공지사항 게시글을 페이징 처리하여 가져오기
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<announcementBoardPost> noticePostsPage = announcementBoardPostRepository.findByBoardIdAndIsNotice(findBoardId.get().getBoardId(), "T", pageable);
     
         List<Map<String, Object>> noticeImgs = new ArrayList<>();
