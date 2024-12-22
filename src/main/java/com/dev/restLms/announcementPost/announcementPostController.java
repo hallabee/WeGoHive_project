@@ -68,7 +68,6 @@ public class announcementPostController {
     @PostMapping("/post")
     @Operation(summary = "공지사항 작성", description = "공지사항을 작성합니다.")
     public ResponseEntity<?> postAnnouncement(
-        @RequestParam String sessionId,
         @RequestParam String boardId,
         @RequestPart("officerBoardPost") BoardPost officerBoardPost,
         @RequestPart("file") MultipartFile file
@@ -76,10 +75,10 @@ public class announcementPostController {
 
             try {
 
-                // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-                //                 .getContext().getAuthentication();
-                // // 유저 세션아이디 보안 컨텍스트에서 가져오기
-                // String sessionId = auth.getPrincipal().toString();
+                UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                                .getContext().getAuthentication();
+                // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                String sessionId = auth.getPrincipal().toString();
 
                  // 회원 확인 
                 Optional<UserOwnPermissionGroup> officerSessionIdCheck = announcementPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
@@ -193,7 +192,6 @@ public class announcementPostController {
     @PostMapping("/postUpdate")
     @Operation(summary = "공지사항 게시글 수정", description = "공지사항을 수정합니다.")
     public ResponseEntity<?> updateAnnouncement(
-        @RequestParam String sessionId,
         @RequestParam String postId,
         @RequestPart("file") MultipartFile file,
         @RequestPart("officerUpdatePost") BoardPost officerUpdatePost
@@ -201,10 +199,10 @@ public class announcementPostController {
 
             try {
 
-                // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-                //                 .getContext().getAuthentication();
-                // // 유저 세션아이디 보안 컨텍스트에서 가져오기
-                // String sessionId = auth.getPrincipal().toString();
+                UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                                .getContext().getAuthentication();
+                // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                String sessionId = auth.getPrincipal().toString();
 
                 Optional<UserOwnPermissionGroup> officerCheck = announcementPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
 
@@ -311,15 +309,14 @@ public class announcementPostController {
     @GetMapping()
     @Operation(summary = "공지사항 확인", description = "공지사항 게시글을 가져옵니다.")
     public ResponseEntity<?> getAnnouncement(
-        @RequestParam String sessionId,
         @RequestParam String postId
     ) {
         try {
 
-            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-            //                     .getContext().getAuthentication();
-            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
-            //     String sessionId = auth.getPrincipal().toString();
+            UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                                .getContext().getAuthentication();
+                // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                String sessionId = auth.getPrincipal().toString();
 
             Optional<UserOwnPermissionGroup> userCheck = announcementPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
     
@@ -430,15 +427,14 @@ public class announcementPostController {
     @PostMapping("postDelete")
     @Operation(summary = "공지사항 삭제", description = "공지사항을 삭제합니다")
     public ResponseEntity<?> deleteAnnouncement(
-        @RequestParam String sessionId,
         @RequestParam String postId 
     ) {
         try {
 
-            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-            //                     .getContext().getAuthentication();
-            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
-            //     String sessionId = auth.getPrincipal().toString();
+            UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                                .getContext().getAuthentication();
+                // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                String sessionId = auth.getPrincipal().toString();
             
             // 사용자 권한 확인
             Optional<UserOwnPermissionGroup> officerOptional = announcementPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);

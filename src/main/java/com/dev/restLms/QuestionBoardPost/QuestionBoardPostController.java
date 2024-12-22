@@ -58,14 +58,13 @@ public class QuestionBoardPostController {
     @GetMapping("/boradPost")
     @Operation(summary = "사용자의 질문과 답변", description = "질문과 답변을 반환합니다")
     public ResponseEntity<?> getboardPost(
-        @RequestParam String sessionId,
         @RequestParam String postId
         ) {
 
-            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-            //                     .getContext().getAuthentication();
-            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
-            //     String sessionId = auth.getPrincipal().toString();
+            UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                                .getContext().getAuthentication();
+                // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                String sessionId = auth.getPrincipal().toString();
 
             // 수강생 권한 확인
             Optional<QuestionBoardPostUserOwnPermissionGroup> userOwnPermissionGroup = questionBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
@@ -132,15 +131,14 @@ public class QuestionBoardPostController {
     @PostMapping("/post")
     @Operation(summary = "질문 게시판 게시글 작성", description = "해당 과목의 질문 게시글을 작성합니다")
     public ResponseEntity<?> postQustionBoard(
-        @RequestParam String sessionId,
         @RequestParam String boardId,
         @RequestBody BoardPost qustionBoardPost
         ) {
 
-            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-            //                     .getContext().getAuthentication();
-            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
-            //     String sessionId = auth.getPrincipal().toString();
+            UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                                .getContext().getAuthentication();
+                // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                String sessionId = auth.getPrincipal().toString();
 
             // 사용자 확인 
             Optional<QuestionBoardPostUserOwnPermissionGroup> userCheck = questionBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
@@ -209,15 +207,14 @@ public class QuestionBoardPostController {
     @PostMapping("/comment")
     @Operation(summary = "질문게시판 게시글의 댓글 작성", description = "질문게시판의 게시글에서 댓글을 작성합니다.")
     public ResponseEntity<?> postComment(
-        @RequestParam String sessionId,
         @RequestParam String postId,
         @RequestBody Comment postComment
         ) {
 
-            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-            //                     .getContext().getAuthentication();
-            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
-            //     String sessionId = auth.getPrincipal().toString();
+            UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                                .getContext().getAuthentication();
+                // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                String sessionId = auth.getPrincipal().toString();
 
             Optional<QuestionBoardPostUserOwnPermissionGroup> userCheck = questionBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
 
@@ -250,14 +247,13 @@ public class QuestionBoardPostController {
     @PostMapping("/deletePost")
     @Operation(summary = "질문게시판 게시글 삭제", description = "질문게시판의 게시글을 삭제합니다")
     public ResponseEntity<?> deletePost(
-        @RequestParam String sessionId,
         @RequestParam String postId
         ) {
 
-            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-            //                     .getContext().getAuthentication();
-            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
-            //     String sessionId = auth.getPrincipal().toString();
+            UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                                .getContext().getAuthentication();
+                // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                String sessionId = auth.getPrincipal().toString();
 
             Optional<QuestionBoardPostBoardPost> findUser = questionBoardPostBoardPostRepository.findByPostId(postId);
 
@@ -293,7 +289,10 @@ public class QuestionBoardPostController {
 
                 Optional<QuestionBoardPostComment> deleteComment = questionBoardPostCommentRepository.findByPostId(postId);
 
-                questionBoardPostCommentRepository.deleteById(deleteComment.get().getCommentId());
+                if(deleteComment.isPresent()){
+                    questionBoardPostCommentRepository.deleteById(deleteComment.get().getCommentId());
+                }
+
 
                 questionBoardPostBoardPostRepository.deleteById(postId);
                 return ResponseEntity.ok().body("삭제 완료");
@@ -309,14 +308,13 @@ public class QuestionBoardPostController {
     @PostMapping("/deleteComment")
     @Operation(summary = "질문게시판 게시글의 댓글 삭제", description = "질문게시판의 게시글의 댓글을 삭제합니다")
     public ResponseEntity<?> deleteComment(
-        @RequestParam String sessionId,
         @RequestParam String commentId
         ) {
 
-            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-            //                     .getContext().getAuthentication();
-            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
-            //     String sessionId = auth.getPrincipal().toString();
+            UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                                .getContext().getAuthentication();
+                // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                String sessionId = auth.getPrincipal().toString();
         
             Optional<QuestionBoardPostUserOwnPermissionGroup> userCheck = questionBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
 

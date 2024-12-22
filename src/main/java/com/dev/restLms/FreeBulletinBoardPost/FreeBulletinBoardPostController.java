@@ -80,7 +80,6 @@ public class FreeBulletinBoardPostController {
     @PostMapping("/post")
     @Operation(summary = "자유게시판 게시글 작성", description = "자유게시판에서 게시글을 작성합니다.")
     public ResponseEntity<?> postBoardPost(
-        @RequestParam String sessionId,
         @RequestParam String boardId,
         @RequestPart("userBoardPost") BoardPost userBoardPost,
         @RequestPart("file") MultipartFile file
@@ -88,10 +87,10 @@ public class FreeBulletinBoardPostController {
 
             try {
 
-                // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-                //                 .getContext().getAuthentication();
-                // // 유저 세션아이디 보안 컨텍스트에서 가져오기
-                // String sessionId = auth.getPrincipal().toString();
+                UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                                .getContext().getAuthentication();
+                // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                String sessionId = auth.getPrincipal().toString();
 
                 Optional<UserOwnPermissionGroup> user = freeBulletinBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
     
@@ -253,15 +252,14 @@ public class FreeBulletinBoardPostController {
     @PostMapping("/comment")
     @Operation(summary = "자유게시판 게시글의 댓글 작성", description = "자유게시판의 게시글에서 댓글을 작성합니다.")
     public ResponseEntity<?> postComment(
-        @RequestParam String sessionId,
         @RequestParam String postId,
         @RequestBody Comment userComment
     ) {
 
-        // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-        //                         .getContext().getAuthentication();
-        //         // 유저 세션아이디 보안 컨텍스트에서 가져오기
-        //         String sessionId = auth.getPrincipal().toString();
+        UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                                .getContext().getAuthentication();
+                // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                String sessionId = auth.getPrincipal().toString();
 
         Optional<UserOwnPermissionGroup> user = freeBulletinBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
 
@@ -299,16 +297,15 @@ public class FreeBulletinBoardPostController {
     @PostMapping("/comment/reply")
     @Operation(summary = "자유게시판 게시글 댓글의 대댓글 작성", description = "자유게시판의 게시글 댓글의 대댓글을 작성합니다.")
     public ResponseEntity<?> postCommentReply(
-        @RequestParam String sessionId,
         @RequestParam String postId,
         @RequestParam String commentId,
         @RequestBody Comment userCommentReply
         ) {
 
-            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-            //                     .getContext().getAuthentication();
-            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
-            //     String sessionId = auth.getPrincipal().toString();
+            UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                                .getContext().getAuthentication();
+                // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                String sessionId = auth.getPrincipal().toString();
 
             Optional<UserOwnPermissionGroup> user = freeBulletinBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
 
@@ -358,17 +355,16 @@ public class FreeBulletinBoardPostController {
     @GetMapping()
     @Operation(summary = "자유게시판 게시글 및 댓글 확인", description = "자유게시판의 게시글과 댓글 목록을 가져옵니다.")
     public ResponseEntity<?> getboardPost(
-        @RequestParam String sessionId,
         @RequestParam String postId,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "5") int size
     ) {
         try {
 
-            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-            //                     .getContext().getAuthentication();
-            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
-            //     String sessionId = auth.getPrincipal().toString();
+            UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                                .getContext().getAuthentication();
+                // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                String sessionId = auth.getPrincipal().toString();
 
             Optional<UserOwnPermissionGroup> user = freeBulletinBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
     
@@ -419,7 +415,11 @@ public class FreeBulletinBoardPostController {
                     userComment.put("commentId", comment.getCommentId());
                     userComment.put("commentAuthorNickname", comment.getAuthorNickname());
                     userComment.put("commentCreatedDate", comment.getCreatedDate());
-                    userComment.put("comment", comment.getContent());
+                    if(!comment.getSessionId().equals(sessionId) && comment.getIsSecret().equals("T")){
+                        userComment.put("comment", "비밀 댓글 입니다.");
+                    }else{
+                        userComment.put("comment", comment.getContent());
+                    }
                     userComment.put("commentSessionId", comment.getSessionId());
                     userComment.put("isSecret", comment.getIsSecret());
                     userComments.add(userComment);
@@ -448,16 +448,15 @@ public class FreeBulletinBoardPostController {
     @GetMapping("/reply")
     @Operation(summary = "자유게시판 댓글의 대댓글 확인", description = "자유게시판의 대댓글 목록을 가져옵니다.")
     public ResponseEntity<?> getCommentReply(
-        @RequestParam String sessionId,
         @RequestParam String commentId,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "6") int size
         ) {
 
-            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-            //                     .getContext().getAuthentication();
-            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
-            //     String sessionId = auth.getPrincipal().toString();
+            UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                                .getContext().getAuthentication();
+                // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                String sessionId = auth.getPrincipal().toString();
 
             // 사용자 확인 
             Optional<UserOwnPermissionGroup> user = freeBulletinBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
@@ -479,7 +478,11 @@ public class FreeBulletinBoardPostController {
                         comment.put("replyCommentId", replyComment.getCommentId());
                         comment.put("replyAuthorNickname", replyComment.getAuthorNickname());
                         comment.put("replyCreatedDate", replyComment.getCreatedDate());
-                        comment.put("replyContent", replyComment.getContent());
+                        if(!replyComment.getSessionId().equals(sessionId) && replyComment.getIsSecret().equals("T")){
+                            comment.put("replyContent", "비밀 답글 입니다.");
+                        }else{
+                            comment.put("replyContent", replyComment.getContent());
+                        }
                         comment.put("replySessionId", replyComment.getSessionId());
                         comment.put("replyIsSecret", replyComment.getIsSecret());
     
@@ -506,14 +509,13 @@ public class FreeBulletinBoardPostController {
     @PostMapping("/postDelete")
     @Operation(summary = "자유게시판 게시글 삭제", description = "자유게시판의 게시글을 삭제합니다")
     public ResponseEntity<?> deletePost(
-        @RequestParam String sessionId,
         @RequestParam String postId
         ) {
 
-            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-            //                     .getContext().getAuthentication();
-            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
-            //     String sessionId = auth.getPrincipal().toString();
+            UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                                .getContext().getAuthentication();
+                // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                String sessionId = auth.getPrincipal().toString();
 
             // 삭제하려는 게시글의 사용자 세션아이디 확인 
             Optional<FreeBulletinBoardPosts> findUser = freeBulletinBoardPostRepository.findByPostId(postId);
@@ -530,8 +532,10 @@ public class FreeBulletinBoardPostController {
 
                 // 게시글 삭제시 게시글에 포함된 댓글들도 전부 삭제하기 위함 
                 List<Comment> deleteComments = freeBulletinBoardPostCommentRepository.findByPostId(postId);
-                for(Comment deleteComment : deleteComments){
-                    freeBulletinBoardPostCommentRepository.deleteById(deleteComment.getCommentId());
+                if(!deleteComments.isEmpty()){
+                    for(Comment deleteComment : deleteComments){
+                        freeBulletinBoardPostCommentRepository.deleteById(deleteComment.getCommentId());
+                    }
                 }
 
                  // 파일 삭제
@@ -563,14 +567,13 @@ public class FreeBulletinBoardPostController {
     @PostMapping("/postComment")
     @Operation(summary = "자유게시판 게시글의 댓글 삭제", description = "자유게시판의 게시글의 댓글을 삭제합니다")
     public ResponseEntity<?> deleteComment(
-        @RequestParam String sessionId,
         @RequestParam String commentId
         ) {
 
-            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-            //                     .getContext().getAuthentication();
-            //     // 유저 세션아이디 보안 컨텍스트에서 가져오기
-            //     String sessionId = auth.getPrincipal().toString();
+            UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                                .getContext().getAuthentication();
+                // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                String sessionId = auth.getPrincipal().toString();
             
             // 삭제하려는 댓글의 사용자 세션 아이디 확인 
             Optional<Comment> findUser = freeBulletinBoardPostCommentRepository.findByCommentId(commentId);
@@ -596,7 +599,6 @@ public class FreeBulletinBoardPostController {
     @PostMapping("/postUpdate")
     @Operation(summary = "자유게시판 게시글 수정", description = "자유게시판을 수정합니다")
     public ResponseEntity<?> UpdateBullentinBoard(
-        @RequestBody String sessionId,
         @RequestParam String postId,
         @RequestPart("file") MultipartFile file,
         @RequestPart("bullentinUpdatePost") BoardPost bullentinUpdatePost
@@ -604,10 +606,10 @@ public class FreeBulletinBoardPostController {
 
             try {
 
-                // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-                //                 .getContext().getAuthentication();
-                // // 유저 세션아이디 보안 컨텍스트에서 가져오기
-                // String sessionId = auth.getPrincipal().toString();
+                UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                                .getContext().getAuthentication();
+                // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                String sessionId = auth.getPrincipal().toString();
                 
                 Optional<FreeBulletinBoardPosts> findPostSessionId = freeBulletinBoardPostRepository.findByPostId(postId);
                 

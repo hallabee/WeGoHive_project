@@ -56,16 +56,15 @@ public class QuestionBoardController {
     @GetMapping()
     @Operation(summary = "해당 질문 게시판의 게시글 제목, 사용자, 작성날짜", description = "해당 질문 게시판에 대한 게시글 목록을 반환합니다")
     public ResponseEntity<?> getAllSubjectQuestion(
-        @RequestParam String sessionId,
         @RequestParam String offeredSubjectsId,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size
     ) {
 
-        // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-        //                         .getContext().getAuthentication();
-        //         // 유저 세션아이디 보안 컨텍스트에서 가져오기
-        //         String sessionId = auth.getPrincipal().toString();
+        UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                            .getContext().getAuthentication();
+            // 유저 세션아이디 보안 컨텍스트에서 가져오기
+            String sessionId = auth.getPrincipal().toString();
 
         // 권한 확인
         Optional<QuestionBoardUserOwnPermissionGroup> userOwnPermissionGroup = questionBoardUserOwnPermissionGroupRepository.findBySessionId(sessionId);
@@ -131,7 +130,8 @@ public class QuestionBoardController {
         List<Map<String, Object>> resultList = new ArrayList<>();
     
         // 페이징 처리된 게시글 가져오기
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Sort sort = Sort.by(Sort.Direction.DESC, "isNotice").and(Sort.by(Sort.Direction.DESC, "createdDate"));
+        Pageable pageable = PageRequest.of(page, size, sort);
         Page<QuestionBoardPost> questionBoardPosts =
             questionBoardPostRepository.findByBoardId(questionBoard.get().getBoardId(), pageable);
     

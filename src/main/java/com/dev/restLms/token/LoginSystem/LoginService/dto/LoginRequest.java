@@ -1,14 +1,14 @@
-// package com.dev.restLms.token.LoginSystem.LoginService.dto;
+package com.dev.restLms.token.LoginSystem.LoginService.dto;
 
-// import lombok.Getter;
-// import lombok.Setter;
+import lombok.Getter;
+import lombok.Setter;
 
-// @Getter
-// @Setter
-// // 로그인 DTO
-// public class LoginRequest {
+@Getter
+@Setter
+// 로그인 DTO
+public class LoginRequest {
 
-//     private String userId;
+    private String userId;
 
-//     private String userPw;
-// }
+    private String userPw;
+}

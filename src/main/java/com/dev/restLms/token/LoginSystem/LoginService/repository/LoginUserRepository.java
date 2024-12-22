@@ -1,13 +1,13 @@
-// package com.dev.restLms.token.LoginSystem.LoginService.repository;
+package com.dev.restLms.token.LoginSystem.LoginService.repository;
 
-// import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-// import com.dev.restLms.entity.User;
-// import java.util.Optional;
+import com.dev.restLms.entity.User;
+import java.util.Optional;
 
 
 
-// public interface LoginUserRepository extends JpaRepository<User, String>{
-//     Optional<User> findByUserId(String userId);
-//     Optional<User> findByUserIdAndUserPw(String userId, String userPw);
-// }
+public interface LoginUserRepository extends JpaRepository<User, String>{
+    Optional<User> findByUserId(String userId);
+    Optional<User> findByUserIdAndUserPw(String userId, String userPw);
+}

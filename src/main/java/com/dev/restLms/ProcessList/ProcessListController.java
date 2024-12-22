@@ -76,32 +76,39 @@ public class ProcessListController {
         List<Map<String, Object>> resultList = new ArrayList<>();
         
         for (Course course : coursePage) {
-            // 수강자 수 조회
-            List<ProcessListUserOwnCourse> userCount = processListUserOwnCourseRepository.findByCourseId(course.getCourseId());
-            int studentCount = userCount.size();
 
-            // 과정 책임자 정보 조회
-            Optional<ProcessListUser> processListUsers = processListUserRepository.findBySessionId(course.getSessionId());
+            if(!course.getCourseTitle().equals("개별과목")){
 
-            // 각 과정 정보와 수강자 수를 HashMap에 추가
-            HashMap<String, Object> courseMap = new HashMap<>();
-            courseMap.put("courseId", course.getCourseId());
-            courseMap.put("courseTitle", course.getCourseTitle());
-            courseMap.put("courseCapacity", course.getCourseCapacity());
-            courseMap.put("enrollStartDate", course.getEnrollStartDate());
-            courseMap.put("enrollEndDate", course.getEnrollEndDate());
-            courseMap.put("studentCount", studentCount);
-            courseMap.put("courseImg", course.getCourseImg());
+                // 수강자 수 조회
+                List<ProcessListUserOwnCourse> userCount = processListUserOwnCourseRepository.findByCourseId(course.getCourseId());
+                int studentCount = userCount.size();
 
-            // 책임자 정보 가져오기
-            courseMap.put("courseOfficerSessionId", processListUsers.get().getSessionId());
-            courseMap.put("courseOfficerUserName", processListUsers.get().getUserName());
+                // 과정 책임자 정보 조회
+                Optional<ProcessListUser> processListUsers = processListUserRepository.findBySessionId(course.getSessionId());
 
-            // 총 과정 수
-            // courseMap.put("courseSize", processListCourseRepository.findAll().size());
+                // 각 과정 정보와 수강자 수를 HashMap에 추가
+                HashMap<String, Object> courseMap = new HashMap<>();
+                courseMap.put("courseId", course.getCourseId());
+                courseMap.put("courseTitle", course.getCourseTitle());
+                courseMap.put("courseCapacity", course.getCourseCapacity());
+                courseMap.put("enrollStartDate", course.getEnrollStartDate());
+                courseMap.put("enrollEndDate", course.getEnrollEndDate());
+                courseMap.put("studentCount", studentCount);
+                courseMap.put("courseImg", course.getCourseImg());
 
-            // 결과를 리스트에 추가
-            resultList.add(courseMap);
+                // 책임자 정보 가져오기
+                courseMap.put("courseOfficerSessionId", processListUsers.get().getSessionId());
+                courseMap.put("courseOfficerUserName", processListUsers.get().getUserName());
+
+                // 총 과정 수
+                // courseMap.put("courseSize", processListCourseRepository.findAll().size());
+
+                // 결과를 리스트에 추가
+                resultList.add(courseMap);
+
+            }
+
+            
         }
 
         // return resultList;
@@ -117,15 +124,14 @@ public class ProcessListController {
     @PostMapping("/registerCourse")
     @Operation(summary = "사용자가 과정 등록", description = "사용자가 과정을 등록합니다.")
     public ResponseEntity<String> userPutCourse(
-        @RequestParam String sessionId,
         @RequestParam String courseId,
         @RequestParam String officerSessionId
     ) {
 
-        // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-        //                         .getContext().getAuthentication();
-        //         // 유저 세션아이디 보안 컨텍스트에서 가져오기
-        //         String sessionId = auth.getPrincipal().toString();
+        UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                                .getContext().getAuthentication();
+                // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                String sessionId = auth.getPrincipal().toString();
 
         // 사용자 권한 그룹에서 사용자 세션 아이디 확인
         Optional<ProcessListUserOwnPermissionGroup> userPermissionGroup = processListUserOwnPermissionGroupRepository.findBySessionId(sessionId);
