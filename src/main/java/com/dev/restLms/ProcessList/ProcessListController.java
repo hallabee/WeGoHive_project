@@ -168,12 +168,13 @@ public class ProcessListController {
                         }
                     }
 
-                    // 듣고 있는 과정이 없을 때 실행행
+                    // 듣고 있는 과정이 없을 때 실행
                     if(userCourses){
                         UserOwnCourse postUserOwnCourse = UserOwnCourse.builder()
                         .sessionId(sessionId)
                         .courseId(courseId)
                         .officerSessionId(officerSessionId)
+                        .courseApproval("F")
                         .build();
                         processListUserOwnCourseRepository.save(postUserOwnCourse);
 
@@ -211,6 +212,7 @@ public class ProcessListController {
                                     UserOwnAssignment postUserOwnAssignment = UserOwnAssignment.builder()
                                     .userSessionId(sessionId)
                                     .offeredSubjectsId(offeredSubject.get().getOfferedSubjectsId())
+                                    .subjectAcceptCategory("F")
                                     .build();
                                     processListUserOwnAssignmentRepository.save(postUserOwnAssignment);
 
@@ -221,6 +223,8 @@ public class ProcessListController {
                                         .uosvSessionId(sessionId)
                                         .uosvEpisodeId(subjectOwnVideo.getEpisodeId())
                                         .uosvOfferedSubjectsId(subjectOwnVideo.getSovOfferedSubjectsId())
+                                        .progress("0")
+                                        .uosvFinal("0")
                                         .build();
                                         processListUserOwnSubjectVideoRepository.save(postUserSubjectOwnVideo);
                                     }
