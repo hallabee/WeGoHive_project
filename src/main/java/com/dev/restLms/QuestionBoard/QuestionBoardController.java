@@ -86,7 +86,7 @@ public class QuestionBoardController {
                     Map<String, Object> response1 = saveboardPost(sessionId, offeredSubjectsId, page, size);
                     return ResponseEntity.ok().body(response1);
 
-                case "COURSE_OFFICER":
+                case "INDIV_OFFICER":
                     // 해당 과정의 책임자인지 확인
                     Optional<QuestionBoardOfferedSubjects> courseOfficerCheck = questionBoardOfferedSubjectsRepository.findByOfferedSubjectsIdAndOfficerSessionId(offeredSubjectsId, sessionId);
                     if(courseOfficerCheck.isPresent()){

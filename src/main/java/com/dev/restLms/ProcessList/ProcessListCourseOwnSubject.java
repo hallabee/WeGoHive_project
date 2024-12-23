@@ -9,5 +9,7 @@ public interface ProcessListCourseOwnSubject {
 	 String getOfficerSessionId();
 	
 	 String getSubjectId();
+
+      String getSubjectApproval();
     
 }

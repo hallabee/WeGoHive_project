@@ -419,8 +419,8 @@ public class FreeBulletinBoardPostController {
                     userComment.put("commentId", comment.getCommentId());
                     userComment.put("commentAuthorNickname", comment.getAuthorNickname());
                     userComment.put("commentCreatedDate", comment.getCreatedDate());
-                    if((!comment.getSessionId().equals(sessionId) && comment.getIsSecret().equals("T")) || !permission.equals("OFFICER") || !permission.equals("SITE_OFFICER")){
-                        userComment.put("comment", "비밀 댓글 입니다.");
+                    if((!comment.getSessionId().equals(sessionId) && comment.getIsSecret().equals("T")) && !permission.equals("OFFICER") && !permission.equals("SITE_OFFICER")){
+                        userComment.put("comment", "비밀 댓글 입니다");
                     }else{
                         userComment.put("comment", comment.getContent());
                     }
@@ -486,7 +486,7 @@ public class FreeBulletinBoardPostController {
                         comment.put("replyCommentId", replyComment.getCommentId());
                         comment.put("replyAuthorNickname", replyComment.getAuthorNickname());
                         comment.put("replyCreatedDate", replyComment.getCreatedDate());
-                        if((!replyComment.getSessionId().equals(sessionId) && replyComment.getIsSecret().equals("T")) || !permission.equals("OFFICER") || !permission.equals("SITE_OFFICER")){
+                        if((!replyComment.getSessionId().equals(sessionId) && replyComment.getIsSecret().equals("T")) && !permission.equals("OFFICER") && !permission.equals("SITE_OFFICER")){
                             comment.put("replyContent", "비밀 답글 입니다.");
                         }else{
                             comment.put("replyContent", replyComment.getContent());
