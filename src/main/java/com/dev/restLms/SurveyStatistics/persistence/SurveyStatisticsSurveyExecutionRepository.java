@@ -5,15 +5,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.dev.restLms.SurveyStatistics.projection.SurveyStatisticsSurveyExecution;
 import com.dev.restLms.entity.SurveyExecution;
 import java.util.Optional;
-import java.util.List;
 
 
 
 
 public interface SurveyStatisticsSurveyExecutionRepository extends JpaRepository<SurveyExecution, String> {
     
-    Optional<SurveyStatisticsSurveyExecution> findBySessionIdAndCourseId(String sessionId, String courseId);
+    Optional<SurveyStatisticsSurveyExecution> findBySessionIdAndCourseIdAndOfferedSubjectsId(String sessionId, String courseId, String offeredSubjectId);
 
-    List<SurveyStatisticsSurveyExecution> findByCourseIdAndSessionId(String courseId, String sessionId);
+
+    Optional<SurveyStatisticsSurveyExecution> findByOfferedSubjectsIdAndCourseIdAndSessionId(String offeredSubjectsId, String courseId, String sessionId);
     
 }

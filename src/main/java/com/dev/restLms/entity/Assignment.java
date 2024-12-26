@@ -12,30 +12,26 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class BoardPost {
-
-    @Id
-    private String postId;
-
-    private String authorNickname;
-    private String createdDate;
-    private String title;
-    private String content;
-    private String boardId;
-    private String sessionId;
-    private String isNotice;
-    private String isSecret;
-    private String fileNo;
+public class Assignment {
+  @Id
+  private String assignmentId;
+  private String teacherSessionId;
+  private String offeredSubjectsId;
+  private String assignmentContent;
+  private String deadline;
+  private String noticeNo;
+  private String cutline;
+  private String assignmentTitle;
 
     @PrePersist
     public void generateUUID() {
-        if (postId == null) {
-            postId = UUID.randomUUID().toString();
+        if (assignmentId == null) {
+          assignmentId = UUID.randomUUID().toString();
         }
     }
 }

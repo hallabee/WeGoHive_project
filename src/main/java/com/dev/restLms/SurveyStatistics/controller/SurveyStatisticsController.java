@@ -9,6 +9,9 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,19 +21,23 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dev.restLms.SurveyStatistics.persistence.SurveyStatisticsCourseOwnSubjectsRepository;
 import com.dev.restLms.SurveyStatistics.persistence.SurveyStatisticsCourseRepository;
 import com.dev.restLms.SurveyStatistics.persistence.SurveyStatisticsOfferedSubjectsRepository;
 import com.dev.restLms.SurveyStatistics.persistence.SurveyStatisticsPermissionGroupRepository;
 import com.dev.restLms.SurveyStatistics.persistence.SurveyStatisticsSubjectsRepository;
 import com.dev.restLms.SurveyStatistics.persistence.SurveyStatisticsSurveyExecutionRepository;
+import com.dev.restLms.SurveyStatistics.persistence.SurveyStatisticsSurveyOwnAnswerRepository;
 import com.dev.restLms.SurveyStatistics.persistence.SurveyStatisticsSurveyOwnResultRepository;
 import com.dev.restLms.SurveyStatistics.persistence.SurveyStatisticsSurveyQuestionRepository;
 import com.dev.restLms.SurveyStatistics.persistence.SurveyStatisticsUserOwnPermssionGroupRepository;
 import com.dev.restLms.SurveyStatistics.projection.SurveyStatisticsCourse;
+import com.dev.restLms.SurveyStatistics.projection.SurveyStatisticsCourseOwnSubjects;
 import com.dev.restLms.SurveyStatistics.projection.SurveyStatisticsOfferedSubjects;
 import com.dev.restLms.SurveyStatistics.projection.SurveyStatisticsPermissionGroup;
 import com.dev.restLms.SurveyStatistics.projection.SurveyStatisticsSubjects;
 import com.dev.restLms.SurveyStatistics.projection.SurveyStatisticsSurveyExecution;
+import com.dev.restLms.SurveyStatistics.projection.SurveyStatisticsSurveyOwnAnswer;
 import com.dev.restLms.SurveyStatistics.projection.SurveyStatisticsSurveyOwnResult;
 import com.dev.restLms.SurveyStatistics.projection.SurveyStatisticsSurveyQuestion;
 import com.dev.restLms.entity.Course;
@@ -72,6 +79,12 @@ public class SurveyStatisticsController {
     @Autowired
     private SurveyStatisticsSubjectsRepository surveyStatisticsSubjectsRepository;
 
+    @Autowired
+    private SurveyStatisticsSurveyOwnAnswerRepository surveyStatisticsSurveyOwnAnswerRepository;
+
+    @Autowired
+    private SurveyStatisticsCourseOwnSubjectsRepository surveyStatisticsCourseOwnSubjectsRepository;
+
     @GetMapping("/Courses")
     @Operation(summary = "책임자의 과정 목록", description = "책임자가 맡은 과정 목록을 불러옵니다.")
     public ResponseEntity<?> getOfficerCourse(
@@ -101,7 +114,7 @@ public class SurveyStatisticsController {
 
             for(SurveyStatisticsCourse findOfficerCourse : findOfficerCourses){
 
-                Optional<SurveyStatisticsSurveyExecution> findSurveyExecutionId = surveyStatisticsSurveyExecutionRepository.findBySessionIdAndCourseId(sessionId, findOfficerCourse.getCourseId());
+                Optional<SurveyStatisticsSurveyExecution> findSurveyExecutionId = surveyStatisticsSurveyExecutionRepository.findBySessionIdAndCourseIdAndOfferedSubjectsId(sessionId, findOfficerCourse.getCourseId(), null);
 
                 if(findSurveyExecutionId.isPresent()){
 
@@ -161,7 +174,7 @@ public class SurveyStatisticsController {
         for(Course findCourse : findCourses){
 
             // 사용자 세션 아이디와 , 과정 코드를 통해 만족도 조사 실시 번호가 있는지 조회 
-            Optional<SurveyStatisticsSurveyExecution> findSurveyExecutionId = surveyStatisticsSurveyExecutionRepository.findBySessionIdAndCourseId(sessionId, findCourse.getCourseId());
+            Optional<SurveyStatisticsSurveyExecution> findSurveyExecutionId = surveyStatisticsSurveyExecutionRepository.findBySessionIdAndCourseIdAndOfferedSubjectsId(sessionId, findCourse.getCourseId(), null);
 
             if(findSurveyExecutionId.isPresent()){
                 
@@ -203,38 +216,47 @@ public class SurveyStatisticsController {
     public ResponseEntity<?> getOfficerSubjects(
         @RequestParam String courseId
     ) {
-        // 사용한 테이블 - SurveyExecution, OfferedSubjects, Subjects
+        try {
 
-        UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        // 유저 세션아이디 보안 컨텍스트에서 가져오기
-        String sessionId = auth.getPrincipal().toString();
+            UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+            // 유저 세션아이디 보안 컨텍스트에서 가져오기
+            String sessionId = auth.getPrincipal().toString();
 
-        // 결과를 저장할 리스트
-        List<Map<String, Object>> resultList = new ArrayList<>();
+            // 결과를 저장할 리스트
+            List<Map<String, Object>> resultList = new ArrayList<>();
 
-        // 만족도 조사 실시 테이블에서 과정코드와 책임자 세션 아이디를 통해 개설과목코드 확인
-        List<SurveyStatisticsSurveyExecution> findOfferedSubjectsIds = surveyStatisticsSurveyExecutionRepository.findByCourseIdAndSessionId(courseId, sessionId);
+            List<SurveyStatisticsCourseOwnSubjects> findSubjectIds = surveyStatisticsCourseOwnSubjectsRepository.findByCourseIdAndOfficerSessionId(courseId, sessionId);
 
-        for(SurveyStatisticsSurveyExecution findOfferedSubject : findOfferedSubjectsIds){
+            for(SurveyStatisticsCourseOwnSubjects findSubject : findSubjectIds){
 
-            if(!findOfferedSubject.getOfferedSubjectsId().isEmpty() || findOfferedSubject.getOfferedSubjectsId() != null){
+                Optional<SurveyStatisticsSubjects> findSubjectName = surveyStatisticsSubjectsRepository.findBySubjectId(findSubject.getSubjectId());
 
-                Optional<SurveyStatisticsOfferedSubjects> findSubjectId = surveyStatisticsOfferedSubjectsRepository.findByOfferedSubjectsId(findOfferedSubject.getOfferedSubjectsId());
+                if(findSubjectName.isPresent()){
 
-                Optional<SurveyStatisticsSubjects> findSubjectName = surveyStatisticsSubjectsRepository.findBySubjectId(findSubjectId.get().getSubjectId());
+                    Optional<SurveyStatisticsOfferedSubjects> findOfferedSubjectsId = surveyStatisticsOfferedSubjectsRepository.findByCourseIdAndOfficerSessionIdAndSubjectId(courseId, sessionId, findSubject.getSubjectId());
 
-                HashMap<String, Object> subjectMap = new HashMap<>();
-                subjectMap.put("subjectTitle", findSubjectName.get().getSubjectName());
-                subjectMap.put("subjectId", findSubjectId.get().getSubjectId());
-                subjectMap.put("surveyExecutionId", findOfferedSubject.getSurveyExecutionId());
+                    if(findOfferedSubjectsId.isPresent()){
 
-                resultList.add(subjectMap);
+                        Optional<SurveyStatisticsSurveyExecution> findCourseOfSubject = surveyStatisticsSurveyExecutionRepository.findByOfferedSubjectsIdAndCourseIdAndSessionId(findOfferedSubjectsId.get().getOfferedSubjectsId(), courseId, sessionId);
 
+                        if(findCourseOfSubject.isPresent()){
+
+                            HashMap<String, Object> subjectMap = new HashMap<>();
+                            subjectMap.put("subjectTitle", findSubjectName.get().getSubjectName());
+                            subjectMap.put("subjectId", findSubject.getSubjectId());
+                            subjectMap.put("surveyExecutionId", findCourseOfSubject.get().getSurveyExecutionId());
+                            
+                            resultList.add(subjectMap);
+
+                        }
+                    }
+                }
             }
 
+            return ResponseEntity.ok().body(resultList);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("오류 발생 : "+e.getMessage());
         }
-
-        return ResponseEntity.ok().body(resultList);
     }
     
 
@@ -282,6 +304,100 @@ public class SurveyStatisticsController {
         resultList.sort((a, b) -> a.get("answerCategory").toString().compareTo(b.get("answerCategory").toString()));
 
         return ResponseEntity.ok().body(resultList);
+    }
+    
+    @GetMapping("/answerStatistics")
+    @Operation(summary = "해당 문항의 통계 또는 답변", description = "해당 문항의 통계 또는 답변을 불러옵니다.")
+    public ResponseEntity<?> getAnswerStatistics(
+        @RequestParam String surveyQuestionId,
+        @RequestParam String surveyExecutionId,
+        @RequestParam String answerCategory,
+        @RequestParam (required = false, defaultValue = "0") int page,
+        @RequestParam (required = false, defaultValue = "5") int size
+        ) {
+
+            List<Map<String, Object>> resultList = new ArrayList<>();
+
+            int num1 = 0;
+            int num2 = 0;
+            int num3 = 0;
+            int num4 = 0;
+            int num5 = 0;
+
+            if(answerCategory.equals("T")){
+
+                // 문항이 5지선다일 때 리스트로 확인
+                List<SurveyStatisticsSurveyOwnResult> findAnswerIds = surveyStatisticsSurveyOwnResultRepository.findBySurveyExecutionIdAndSurveyQuestionId(surveyExecutionId, surveyQuestionId);
+
+                for(SurveyStatisticsSurveyOwnResult findAnswerId : findAnswerIds){
+
+                    // 해당 문항의 답변 확인
+                    Optional<SurveyStatisticsSurveyOwnAnswer> findAnswer = surveyStatisticsSurveyOwnAnswerRepository.findBySurveyAnswerIdAndSurveyQuestionId(findAnswerId.getSurveyAnswerId(), surveyQuestionId);
+
+                    if(findAnswer.isPresent()){
+                        String answerNumber = findAnswer.get().getScore();
+
+                        if(answerNumber.equals("1")){
+                            num1 += 1;
+                        }else if(answerNumber.equals("2")){
+                            num2 += 1;
+                        }else if(answerNumber.equals("3")){
+                            num3 += 1;
+                        }else if(answerNumber.equals("4")){
+                            num4 += 1;
+                        }else if(answerNumber.equals("5")){
+                            num5 += 1;
+                        }
+                    }
+                }
+
+                HashMap<String, Object> answerMap = new HashMap<>();
+                int totalAnswerSize = findAnswerIds.size();
+
+                if(totalAnswerSize > 0){
+                    answerMap.put("VeryNo", (int)Math.round((double)num1*100/totalAnswerSize));
+                    answerMap.put("No",   (int)Math.round((double)num2*100/totalAnswerSize));
+                    answerMap.put("Normal",  (int)Math.round((double)num3*100/totalAnswerSize));
+                    answerMap.put("Yes",  (int)Math.round((double)num4*100/totalAnswerSize));
+                    answerMap.put("VeryYes",  (int)Math.round((double)num5*100/totalAnswerSize));
+                }else {
+                    // 응답이 없을 경우 0%로 설정
+                    answerMap.put("VeryNo", 0);
+                    answerMap.put("No", 0);
+                    answerMap.put("Normal", 0);
+                    answerMap.put("Yes", 0);
+                    answerMap.put("VeryYes", 0);
+                }
+                return ResponseEntity.ok().body(answerMap);
+
+            }else if(answerCategory.equals("F")){
+
+                // 문항이 서술형일 때 페이지네이션으로 확인 
+                Pageable pageable = PageRequest.of(page, size);
+                Page<SurveyStatisticsSurveyOwnResult> findFormAnswerIds = surveyStatisticsSurveyOwnResultRepository.findBySurveyExecutionIdAndSurveyQuestionId(surveyExecutionId, surveyQuestionId, pageable);
+
+                for(SurveyStatisticsSurveyOwnResult findFormAnswerId : findFormAnswerIds){
+
+                    // 해당 문항의 답변 확인
+                    Optional<SurveyStatisticsSurveyOwnAnswer> findFormAnswer = surveyStatisticsSurveyOwnAnswerRepository.findBySurveyAnswerIdAndSurveyQuestionId(findFormAnswerId.getSurveyAnswerId(), surveyQuestionId);
+
+                    if(findFormAnswer.isPresent()){
+
+                        HashMap<String, Object> formAnswerMap = new HashMap<>();
+                        formAnswerMap.put("answerData", findFormAnswer.get().getAnswerData());
+                        resultList.add(formAnswerMap);
+
+                    }
+                }
+                Map<String, Object> response = new HashMap<>();
+                response.put("content", resultList);
+                response.put("currentPage", findFormAnswerIds.getNumber());
+                response.put("totalItems", findFormAnswerIds.getTotalElements());
+                response.put("totalPages", findFormAnswerIds.getTotalPages());
+
+                return ResponseEntity.ok().body(response);
+            }
+        return ResponseEntity.status(HttpStatus.CONFLICT).body("문항의 답변이 없습니다.");
     }
     
     
