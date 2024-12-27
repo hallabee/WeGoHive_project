@@ -7,7 +7,7 @@ import com.dev.restLms.entity.SurveyExecution;
 import java.util.Optional;
 
 
-public interface ConductSurveyExecutionResitory extends JpaRepository <SurveyExecution, String> {
+public interface ConductSurveyExecutionRepository extends JpaRepository <SurveyExecution, String> {
     Optional<ConductSurveyExecution> findByCourseIdAndSessionId(String courseId, String sessionId);
     Optional<ConductSurveyExecution> findByCourseIdAndSessionIdAndOfferedSubjectsId(String courseId, String sessionId, String offeredSubjectsId);
 }

@@ -1,7 +1,7 @@
 package com.dev.restLms.ConductSurvey.projection;
 
 public interface ConductSurveyQuestion {
-    String getSurveyQestionId();
+    String getSurveyQuestionId();
 
     String getQuestionData();
     String getAnswerCategory();

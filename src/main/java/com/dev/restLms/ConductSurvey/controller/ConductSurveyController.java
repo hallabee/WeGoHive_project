@@ -23,8 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dev.restLms.ConductSurvey.dto.checkQuestionDto;
 import com.dev.restLms.ConductSurvey.persistence.ConductSurveyCourseOwnSubjectRepository;
 import com.dev.restLms.ConductSurvey.persistence.ConductSurveyCourseRepository;
-import com.dev.restLms.ConductSurvey.persistence.ConductSurveyExecutionResitory;
+import com.dev.restLms.ConductSurvey.persistence.ConductSurveyExecutionRepository;
 import com.dev.restLms.ConductSurvey.persistence.ConductSurveyOfferedSubjectsRepository;
+import com.dev.restLms.ConductSurvey.persistence.ConductSurveyOwnAnswerRepository;
+import com.dev.restLms.ConductSurvey.persistence.ConductSurveyOwnResultRepository;
 import com.dev.restLms.ConductSurvey.persistence.ConductSurveyQuestionRepository;
 import com.dev.restLms.ConductSurvey.persistence.ConductSurveySubjectRepository;
 import com.dev.restLms.ConductSurvey.persistence.ConductSurveyUserOwnCourseRepository;
@@ -35,9 +37,13 @@ import com.dev.restLms.ConductSurvey.projection.ConductSurveyOfferedSubjects;
 import com.dev.restLms.ConductSurvey.projection.ConductSurveyQuestion;
 import com.dev.restLms.ConductSurvey.projection.ConductSurveySubject;
 import com.dev.restLms.ConductSurvey.projection.ConductSurveyUserOwnCourse;
+import com.dev.restLms.entity.SurveyExecution;
+import com.dev.restLms.entity.SurveyOwnAnswer;
+import com.dev.restLms.entity.SurveyOwnResult;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,7 +59,7 @@ public class ConductSurveyController {
     private ConductSurveyCourseRepository conductSurveyCourseRepository;
 
     @Autowired
-    private ConductSurveyExecutionResitory conductSurveyExecutionResitory;
+    private ConductSurveyExecutionRepository conductSurveyExecutionRepository;
 
     @Autowired
     private ConductSurveyCourseOwnSubjectRepository conductSurveyCourseOwnSubjectRepository;
@@ -69,6 +75,12 @@ public class ConductSurveyController {
 
     @Autowired
     private ConductSurveyUserOwnCourseRepository conductSurveyUserOwnCourseRepository;
+
+    @Autowired
+    private ConductSurveyOwnAnswerRepository conductSurveyOwnAnswerRepository;
+
+    @Autowired
+    private ConductSurveyOwnResultRepository conductSurveyOwnResultRepository;
 
     @GetMapping("/Courses")
     @Operation(summary = "책임자의 과정 목록", description = "책임자가 맡은 과정 목록을 불러옵니다.")
@@ -99,16 +111,26 @@ public class ConductSurveyController {
                     if(nowDate >= courseStartDate){
 
                         // 해당 과정이 만족도 조사를 실시 했는지 확인 
-                        Optional<ConductSurveyExecution> officerCourseCheck = conductSurveyExecutionResitory.findByCourseIdAndSessionId(findOfficerCourse.getCourseId(), sessionId);
+                        Optional<ConductSurveyExecution> officerCourseCheck =  conductSurveyExecutionRepository.findByCourseIdAndSessionIdAndOfferedSubjectsId(findOfficerCourse.getCourseId(), sessionId, null);
     
                         if(officerCourseCheck.isEmpty()){
     
                             HashMap<String, Object> courseMap = new HashMap<>();
                             courseMap.put("courseTitle", findOfficerCourse.getCourseTitle());
                             courseMap.put("courseId", findOfficerCourse.getCourseId());
+                            courseMap.put("courseSurveyCheck", "none");
     
                             resultList.add(courseMap);
     
+                        }else{
+
+                            HashMap<String, Object> courseMap = new HashMap<>();
+                            courseMap.put("courseTitle", findOfficerCourse.getCourseTitle());
+                            courseMap.put("courseId", findOfficerCourse.getCourseId());
+                            courseMap.put("courseSurveyCheck", "done");
+    
+                            resultList.add(courseMap);
+
                         }
                     }
                 }
@@ -161,13 +183,23 @@ public class ConductSurveyController {
                     if(nowDate >= courseStartDate){
 
                         // 해당 과정이 만족도 조사를 실시 했는지 확인 
-                        Optional<ConductSurveyExecution> officerCourseCheck = conductSurveyExecutionResitory.findByCourseIdAndSessionId(findCourse.getCourseId(), sessionId);
+                        Optional<ConductSurveyExecution> officerCourseCheck =  conductSurveyExecutionRepository.findByCourseIdAndSessionIdAndOfferedSubjectsId(findCourse.getCourseId(), sessionId, null);
         
                         if(officerCourseCheck.isEmpty()){
 
                             HashMap<String, Object> courseMap = new HashMap<>();
                             courseMap.put("courseTitle", findCourse.getCourseTitle());
                             courseMap.put("courseId", findCourse.getCourseId());
+                            courseMap.put("courseSurveyCheck", "none");
+
+                            resultList.add(courseMap);
+
+                        }else{
+
+                            HashMap<String, Object> courseMap = new HashMap<>();
+                            courseMap.put("courseTitle", findCourse.getCourseTitle());
+                            courseMap.put("courseId", findCourse.getCourseId());
+                            courseMap.put("courseSurveyCheck", "done");
 
                             resultList.add(courseMap);
 
@@ -206,9 +238,7 @@ public class ConductSurveyController {
 
             try {
 
-                // Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "questionData"));
-                // Page<ConductSurveyQuestion> findCourseQuestions = conductSurveyQuestionRepository.findBySurveyCategorAndQuestionInactive("course", "F", Sort.by(Sort.Direction.ASC, "surveyDategory") , pageable);
-                Sort sort = Sort.by(Sort.Direction.ASC, "surveyCategory").and(Sort.by(Sort.Direction.ASC, "questionData"));
+                Sort sort = Sort.by(Sort.Direction.ASC, "answerCategory").and(Sort.by(Sort.Direction.ASC, "questionData"));
                 Pageable pageable = PageRequest.of(page, size, sort);
                 Page<ConductSurveyQuestion> findCourseQuestions = conductSurveyQuestionRepository.findBySurveyCategoryAndQuestionInactive("course", "F", pageable);
 
@@ -218,7 +248,7 @@ public class ConductSurveyController {
 
                     Map<String, Object> courseQuestionMap = new HashMap<>();
                     courseQuestionMap.put("answerData", findCourseQuestion.getQuestionData());
-                    courseQuestionMap.put("surveyQuestionId", findCourseQuestion.getSurveyQestionId());
+                    courseQuestionMap.put("surveyQuestionId", findCourseQuestion.getSurveyQuestionId());
                     if(findCourseQuestion.getAnswerCategory().equals("T")){
                         courseQuestionMap.put("answerCategory", "5지 선다");
                     }else if(findCourseQuestion.getAnswerCategory().equals("F")){
@@ -252,7 +282,7 @@ public class ConductSurveyController {
 
             try {
 
-                Sort sort = Sort.by(Sort.Direction.ASC, "surveyCategory").and(Sort.by(Sort.Direction.ASC, "questionData"));
+                Sort sort = Sort.by(Sort.Direction.ASC, "answerCategory").and(Sort.by(Sort.Direction.ASC, "questionData"));
                 Pageable pageable = PageRequest.of(page, size, sort);
                 Page<ConductSurveyQuestion> findCourseQuestions = conductSurveyQuestionRepository.findByQuestionDataContainingAndSurveyCategoryAndQuestionInactive(questionData, "course", "F", pageable);
                 List<Map<String, Object>> resultList = new ArrayList<>();
@@ -261,7 +291,7 @@ public class ConductSurveyController {
 
                     Map<String, Object> courseQuestionMap = new HashMap<>();
                     courseQuestionMap.put("answerData", findCourseQuestion.getQuestionData());
-                    courseQuestionMap.put("surveyQuestionId", findCourseQuestion.getSurveyQestionId());
+                    courseQuestionMap.put("surveyQuestionId", findCourseQuestion.getSurveyQuestionId());
                     if(findCourseQuestion.getAnswerCategory().equals("T")){
                         courseQuestionMap.put("answerCategory", "5지 선다");
                     }else if(findCourseQuestion.getAnswerCategory().equals("F")){
@@ -301,31 +331,52 @@ public class ConductSurveyController {
                 // 해당 과정을 듣는 사용자들 확인 
                 List<ConductSurveyUserOwnCourse> findCourseUsers = conductSurveyUserOwnCourseRepository.findByCourseIdAndOfficerSessionId(courseId, sessionId);
 
+                if(findCourseUsers.isEmpty()){
+                    return ResponseEntity.status(HttpStatus.CONFLICT).body("해당 과정의 수강생이 없습니다.");
+                }
+
+                SurveyExecution postSurveyExecution = SurveyExecution.builder()
+                    .courseId(courseId)
+                    .sessionId(sessionId)
+                    .build();
+                conductSurveyExecutionRepository.save(postSurveyExecution);
+
                 for(ConductSurveyUserOwnCourse findCourseUser : findCourseUsers){
 
                     for(checkQuestionDto courseQuestion : courseQuestions){
 
-                        
+                        SurveyOwnAnswer postSurveyOwnAnswer = SurveyOwnAnswer.builder()
+                            .surveyQuestionId(courseQuestion.getSurveyQuestionId())
+                            .build();
+                        conductSurveyOwnAnswerRepository.save(postSurveyOwnAnswer);
+
+                        SurveyOwnResult postSurveyOwnResult = SurveyOwnResult.builder()
+                            .surveyExecutionId(postSurveyExecution.getSurveyExecutionId())
+                            .sessionId(findCourseUser.getSessionId())
+                            .surveyQuestionId(courseQuestion.getSurveyQuestionId())
+                            .surveyAnswerId(postSurveyOwnAnswer.getSurveyAnswerId())
+                            .build();
+                        conductSurveyOwnResultRepository.save(postSurveyOwnResult);
     
                     }
-
                 }
 
+                int userSize = findCourseUsers.size();
+                Optional<ConductSurveyCourse> findCourseTitle = conductSurveyCourseRepository.findByCourseId(courseId);
+                String courseTitle = null;
+                if(findCourseTitle.isPresent()){
+                    courseTitle = findCourseTitle.get().getCourseTitle();
+                }
 
-                
-
+                return ResponseEntity.ok().body(courseTitle+"과정에 대한 "+ userSize+"명의 과정 만족도 조사 실행");
                 
             } catch (Exception e) {
                return ResponseEntity.status(HttpStatus.CONFLICT).body("오류 발생 : " + e.getMessage());
             }
-            
-            
-        
-        return null;
     }
     
     
-    // --------------------------------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------------
 
     @GetMapping("/Subjects")
     @Operation(summary = "책임자의 과정의 과목 목록", description = "책임자가 맡은 과정의 과목 목록을 불러옵니다")
@@ -343,7 +394,7 @@ public class ConductSurveyController {
                 List<Map<String, Object>> resultList = new ArrayList<>();
 
                 // 해당 과정의 과목 목록 확인 
-                List<ConductSurveyCourseOwnSubject> findCourseOwnSubjects = conductSurveyCourseOwnSubjectRepository.findByCourseIdAndOfficerSessionId(courseId, courseId);
+                List<ConductSurveyCourseOwnSubject> findCourseOwnSubjects = conductSurveyCourseOwnSubjectRepository.findByCourseIdAndOfficerSessionId(courseId, sessionId);
 
                 for(ConductSurveyCourseOwnSubject findCourseOwnSubject : findCourseOwnSubjects){
 
@@ -351,7 +402,7 @@ public class ConductSurveyController {
                     Optional<ConductSurveyOfferedSubjects> findOfferedSubejctId = conductSurveyOfferedSubjectsRepository.findByCourseIdAndSubjectIdAndOfficerSessionId(courseId, findCourseOwnSubject.getSubjectId(), sessionId);
 
                     // 해당 과정의 과목을 만족도 조사 실시했는지 확인 
-                    Optional<ConductSurveyExecution> findSurveyExecution = conductSurveyExecutionResitory.findByCourseIdAndSessionIdAndOfferedSubjectsId(courseId, sessionId, findOfferedSubejctId.get().getOfferedSubjectsId());
+                    Optional<ConductSurveyExecution> findSurveyExecution = conductSurveyExecutionRepository.findByCourseIdAndSessionIdAndOfferedSubjectsId(courseId, sessionId, findOfferedSubejctId.get().getOfferedSubjectsId());
 
                     if(findSurveyExecution.isEmpty()){
 
@@ -362,6 +413,20 @@ public class ConductSurveyController {
                         subjectMap.put("subjectName", findSubjectName.get().getSubjectName());
                         subjectMap.put("subjectId", findCourseOwnSubject.getSubjectId());
                         subjectMap.put("courseId", courseId);
+                        subjectMap.put("subjectSurveyCheck", "none");
+
+                        resultList.add(subjectMap);
+
+                    }else{
+
+                        // 해당 과목의 이름을 확인 
+                        Optional<ConductSurveySubject> findSubjectName = conductSurveySubjectRepository.findBySubjectId(findCourseOwnSubject.getSubjectId());
+
+                        HashMap<String, Object> subjectMap = new HashMap<>();
+                        subjectMap.put("subjectName", findSubjectName.get().getSubjectName());
+                        subjectMap.put("subjectId", findCourseOwnSubject.getSubjectId());
+                        subjectMap.put("courseId", courseId);
+                        subjectMap.put("subjectSurveyCheck", "done");
 
                         resultList.add(subjectMap);
 
@@ -387,9 +452,7 @@ public class ConductSurveyController {
 
             try {
 
-                // Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "questionData"));
-                // Page<ConductSurveyQuestion> findCourseQuestions = conductSurveyQuestionRepository.findBySurveyCategorAndQuestionInactive("course", "F", Sort.by(Sort.Direction.ASC, "surveyDategory") , pageable);
-                Sort sort = Sort.by(Sort.Direction.ASC, "surveyCategory").and(Sort.by(Sort.Direction.ASC, "questionData"));
+                Sort sort = Sort.by(Sort.Direction.ASC, "answerCategory").and(Sort.by(Sort.Direction.ASC, "questionData"));
                 Pageable pageable = PageRequest.of(page, size, sort);
                 Page<ConductSurveyQuestion> findCourseQuestions = conductSurveyQuestionRepository.findBySurveyCategoryAndQuestionInactive("subject", "F", pageable);
 
@@ -399,10 +462,10 @@ public class ConductSurveyController {
 
                     Map<String, Object> courseQuestionMap = new HashMap<>();
                     courseQuestionMap.put("answerData", findCourseQuestion.getQuestionData());
-                    courseQuestionMap.put("surveyQuestionId", findCourseQuestion.getSurveyQestionId());
+                    courseQuestionMap.put("surveyQuestionId", findCourseQuestion.getSurveyQuestionId());
                     if(findCourseQuestion.getAnswerCategory().equals("T")){
                         courseQuestionMap.put("answerCategory", "5지 선다");
-                    }else if(findCourseQuestion.getAnswerCategory().equals("F")){
+                    }else if(findCourseQuestion.getAnswerCategory().equals( "F")){
                         courseQuestionMap.put("answerCategory", "서술형");
                     }
 
@@ -433,7 +496,7 @@ public class ConductSurveyController {
 
             try {
 
-                Sort sort = Sort.by(Sort.Direction.ASC, "surveyCategory").and(Sort.by(Sort.Direction.ASC, "questionData"));
+                Sort sort = Sort.by(Sort.Direction.ASC, "answerCategory").and(Sort.by(Sort.Direction.ASC, "questionData"));
                 Pageable pageable = PageRequest.of(page, size, sort);
                 Page<ConductSurveyQuestion> findCourseQuestions = conductSurveyQuestionRepository.findByQuestionDataContainingAndSurveyCategoryAndQuestionInactive(questionData, "subject", "F", pageable);
                 List<Map<String, Object>> resultList = new ArrayList<>();
@@ -442,7 +505,7 @@ public class ConductSurveyController {
 
                     Map<String, Object> courseQuestionMap = new HashMap<>();
                     courseQuestionMap.put("answerData", findCourseQuestion.getQuestionData());
-                    courseQuestionMap.put("surveyQuestionId", findCourseQuestion.getSurveyQestionId());
+                    courseQuestionMap.put("surveyQuestionId", findCourseQuestion.getSurveyQuestionId());
                     if(findCourseQuestion.getAnswerCategory().equals("T")){
                         courseQuestionMap.put("answerCategory", "5지 선다");
                     }else if(findCourseQuestion.getAnswerCategory().equals("F")){
@@ -463,6 +526,81 @@ public class ConductSurveyController {
                 
             } catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("오류 발생 : "+e.getMessage());
+            }
+    }
+
+    @PostMapping("/postSubjectQuestion")
+    @Operation(summary = "해당 과정의 과목에 대한 만족도 조사 실시", description = "해당 과정의 과목에 대해 선택한 문항으로 만족도 조사를 실시합니다.")
+    public ResponseEntity<?> postSubjectQuestion(
+        @RequestParam String courseId,
+        @RequestParam String subjectId,
+        @RequestBody List<checkQuestionDto>  courseQuestions
+        ) {
+
+            try {
+
+                UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                                .getContext().getAuthentication();
+                String sessionId = auth.getPrincipal().toString();
+
+                // 해당 과정을 듣는 사용자들 확인 
+                List<ConductSurveyUserOwnCourse> findCourseUsers = conductSurveyUserOwnCourseRepository.findByCourseIdAndOfficerSessionId(courseId, sessionId);
+
+                if(findCourseUsers.isEmpty()){
+                    return ResponseEntity.status(HttpStatus.CONFLICT).body("해당 과정의 수강생이 없습니다.");
+                }
+
+                Optional<ConductSurveyOfferedSubjects> findOfferedSubjectId = conductSurveyOfferedSubjectsRepository.findByCourseIdAndSubjectIdAndOfficerSessionId(courseId, subjectId, sessionId);
+
+                if(findOfferedSubjectId.isPresent()){
+
+                    SurveyExecution postSurveyExecution = SurveyExecution.builder()
+                        .courseId(courseId)
+                        .offeredSubjectsId(findOfferedSubjectId.get().getOfferedSubjectsId())
+                        .sessionId(sessionId)
+                        .build();
+                    conductSurveyExecutionRepository.save(postSurveyExecution);
+    
+                    for(ConductSurveyUserOwnCourse findCourseUser : findCourseUsers){
+    
+                        for(checkQuestionDto courseQuestion : courseQuestions){
+    
+                            SurveyOwnAnswer postSurveyOwnAnswer = SurveyOwnAnswer.builder()
+                                .surveyQuestionId(courseQuestion.getSurveyQuestionId())
+                                .build();
+                            conductSurveyOwnAnswerRepository.save(postSurveyOwnAnswer);
+    
+                            SurveyOwnResult postSurveyOwnResult = SurveyOwnResult.builder()
+                                .surveyExecutionId(postSurveyExecution.getSurveyExecutionId())
+                                .sessionId(findCourseUser.getSessionId())
+                                .surveyQuestionId(courseQuestion.getSurveyQuestionId())
+                                .surveyAnswerId(postSurveyOwnAnswer.getSurveyAnswerId())
+                                .build();
+                            conductSurveyOwnResultRepository.save(postSurveyOwnResult);
+        
+                        }
+                    }
+                }
+
+
+                int userSize = findCourseUsers.size();
+
+                Optional<ConductSurveyCourse> findCourseTitle = conductSurveyCourseRepository.findByCourseId(courseId);
+                String courseTitle = null;
+                if(findCourseTitle.isPresent()){
+                    courseTitle = findCourseTitle.get().getCourseTitle();
+                }
+
+                Optional<ConductSurveySubject> findSubjectName = conductSurveySubjectRepository.findBySubjectId(subjectId);
+                String subjectName = null;
+                if(findSubjectName.isPresent()){
+                    subjectName = findSubjectName.get().getSubjectName();
+                }
+
+                return ResponseEntity.ok().body(courseTitle+"과정의 " + subjectName +"과목에 대한 "+ userSize+"명의 과정 만족도 조사 실행");
+                
+            } catch (Exception e) {
+               return ResponseEntity.status(HttpStatus.CONFLICT).body("오류 발생 : " + e.getMessage());
             }
     }
 

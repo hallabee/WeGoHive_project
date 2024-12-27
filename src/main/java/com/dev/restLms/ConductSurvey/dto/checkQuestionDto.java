@@ -14,6 +14,4 @@ import lombok.Setter;
 public class checkQuestionDto {
     
     String surveyQuestionId;
-    String questionData;
-    String answerCategory;
 }
