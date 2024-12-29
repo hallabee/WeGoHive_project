@@ -62,9 +62,9 @@ public class QuestionBoardController {
     ) {
 
         UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-                            .getContext().getAuthentication();
-            // 유저 세션아이디 보안 컨텍스트에서 가져오기
-            String sessionId = auth.getPrincipal().toString();
+                                .getContext().getAuthentication();
+                // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                String sessionId = auth.getPrincipal().toString();
 
         // 권한 확인
         Optional<QuestionBoardUserOwnPermissionGroup> userOwnPermissionGroup = questionBoardUserOwnPermissionGroupRepository.findBySessionId(sessionId);
@@ -86,7 +86,7 @@ public class QuestionBoardController {
                     Map<String, Object> response1 = saveboardPost(sessionId, offeredSubjectsId, page, size);
                     return ResponseEntity.ok().body(response1);
 
-                case "INDIV_OFFICER":
+                case "COURSE_OFFICER":
                     // 해당 과정의 책임자인지 확인
                     Optional<QuestionBoardOfferedSubjects> courseOfficerCheck = questionBoardOfferedSubjectsRepository.findByOfferedSubjectsIdAndOfficerSessionId(offeredSubjectsId, sessionId);
                     if(courseOfficerCheck.isPresent()){

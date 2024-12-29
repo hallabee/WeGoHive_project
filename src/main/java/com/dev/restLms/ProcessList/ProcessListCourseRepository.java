@@ -10,5 +10,5 @@ import com.dev.restLms.entity.Course;
 
 @Repository
 public interface ProcessListCourseRepository extends JpaRepository<Course,String> {
-    List<ProcessListCourse> findBycourseId(String courseId);
+    // List<ProcessListCourse> findBycourseId(String courseId);
 }

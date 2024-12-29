@@ -293,7 +293,6 @@ public class QuestionBoardPostController {
                     questionBoardPostCommentRepository.deleteById(deleteComment.get().getCommentId());
                 }
 
-
                 questionBoardPostBoardPostRepository.deleteById(postId);
                 return ResponseEntity.ok().body("삭제 완료");
 
