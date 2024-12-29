@@ -8,5 +8,5 @@ import com.dev.restLms.entity.BoardPost;
 
 
 public interface FreeBulletinBoardPostsRepository extends JpaRepository<BoardPost, String> {
-    Page<FreeBulletinBoardPost> findByBoardId(String boardId, Pageable pageable);
+    Page<FreeBulletinBoardPost> findByBoardIdAndIsNotice(String boardId, String isNotice, Pageable pageable);
 }

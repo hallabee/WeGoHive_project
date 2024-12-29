@@ -15,6 +15,6 @@ public interface ItemManagementSurveyQuestionRepository extends JpaRepository<Su
 
     Page<ItemManagementSurveyQuestion> findByQuestionDataContainingAndSurveyCategoryAndQuestionInactive(String questionData, String surveyCategory, String questionInactive, Pageable pageable);
 
-    Optional<ItemManagementSurveyQuestion> findBySurveyQuestionId(String surveyQuestionId);
+    Optional<SurveyQuestion> findBySurveyQuestionId(String surveyQuestionId);
 
 }

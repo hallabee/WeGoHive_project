@@ -293,15 +293,7 @@ public class ItemManagementController {
                 if(findQuestion.isEmpty()){
 
                     itemManagementSurveyQuestionRepository.deleteById(surveyQuestionId);
-
-                    if(!itemManagementSurveyQuestionRepository.existsById(surveyQuestionId)) {
-
-                        return ResponseEntity.ok().body("삭제 완료");
-
-                    }else{
-                        return ResponseEntity.status(HttpStatus.CONFLICT).body("삭제 실패");
-                    }
-                    
+                    return ResponseEntity.ok().body("삭제 완료");
 
                 }else{
                     SurveyQuestion surveyQuestion = itemManagementSurveyQuestionRepository.findById(surveyQuestionId).orElseThrow(() -> new RuntimeException("문항을 찾을 수 없습니다."));

@@ -49,10 +49,29 @@ public class FreeBulletinBoardController {
             // 자유게시판의 게시글 확인 
             Sort sort = Sort.by(Sort.Direction.DESC, "isNotice").and(Sort.by(Sort.Direction.DESC, "createdDate"));
             Pageable pageable = PageRequest.of(page, size, sort);
-            Page<FreeBulletinBoardPost> findBoardPosts = freeBulletinBoardPostRepository.findByBoardId(findBoardId.get().getBoardId(), pageable);
-    
+            
+            List<Map<String, Object>> resultNoticeList = new ArrayList<>();
+
+            Page<FreeBulletinBoardPost> findNoticePosts = freeBulletinBoardPostRepository.findByBoardIdAndIsNotice(findBoardId.get().getBoardId(), "T", pageable);
+
+            for(FreeBulletinBoardPost findNoticePost : findNoticePosts){
+
+                Map<String, Object> noticeMap = new HashMap<>();
+                noticeMap.put("postId", findNoticePost.getPostId());
+                noticeMap.put("title", findNoticePost.getTitle());
+                noticeMap.put("authorNickname", findNoticePost.getAuthorNickname());
+                noticeMap.put("createdDate", findNoticePost.getCreatedDate());
+                noticeMap.put("isNotice", findNoticePost.getIsNotice());
+                noticeMap.put("boardId", findBoardId.get().getBoardId());
+                noticeMap.put("boardCategory", findBoardId.get().getBoardCategory());
+                resultNoticeList.add(noticeMap);
+
+            }
+
             List<Map<String, Object>> resultList = new ArrayList<>();
-    
+
+            Page<FreeBulletinBoardPost> findBoardPosts = freeBulletinBoardPostRepository.findByBoardIdAndIsNotice(findBoardId.get().getBoardId(), "F", pageable);
+            
             for(FreeBulletinBoardPost findBoardPost : findBoardPosts){
     
                 Map<String, Object> postMap = new HashMap<>();
@@ -66,8 +85,10 @@ public class FreeBulletinBoardController {
                 resultList.add(postMap);
     
             }
+    
             
             Map<String, Object> response = new HashMap<>();
+            response.put("notices", resultNoticeList);
             response.put("posts", resultList);
             response.put("currentPage", findBoardPosts.getNumber());
             response.put("totalItems", findBoardPosts.getTotalElements());

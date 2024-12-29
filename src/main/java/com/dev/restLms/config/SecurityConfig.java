@@ -12,7 +12,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.dev.restLms.Auth.filter.JwtAuthenticationFilter;
+import com.dev.restLms.token.LoginSystem.LoginService.filter.JwtAuthenticationFilter;
 
 
 // 시큐리티 설정 없애기
@@ -33,11 +33,11 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 추가
                 .authorizeHttpRequests(
                         auth -> auth
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui/index.html",
-                                            "/api/login", "/api/security/getcontext", "/Home/RandSubjectVid", 
-                                            "/freeBulletinBoard", "/announcement", "/announcement/mainBanner", "/announcementPost/images/**")
-                        .permitAll() // Swagger 관련 경로 허용
-                        .anyRequest().authenticated()
+                                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui/index.html",
+                                "/api/login", "/api/security/getcontext", "/Home/RandSubjectVid", 
+                                "/freeBulletinBoard", "/announcement", "/announcement/mainBanner", "/announcementPost/images/**")
+                                .permitAll() // Swagger 관련 경로 허용
+                                .anyRequest().authenticated() //
                 )
                 .httpBasic(basic -> {
                 });
@@ -48,7 +48,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://10.10.10.200:3000", "http://10.10.10.48:3000")); // React 앱의
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://10.10.24.67:3000")); // React 앱의
                                                                                                             // URL 허용
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE")); // 허용할 HTTP 메서드
         configuration.setAllowedHeaders(Arrays.asList("*")); // 모든 헤더 허용
