@@ -120,7 +120,7 @@ public class ProcessListController {
 
         for (Course course : coursePage) {
 
-            if (!course.getCourseTitle().equals("개별과목")) {
+            if (!course.getCourseId().equals("individual-subjects")) {
 
                 // 수강자 수 조회
                 List<ProcessListUserOwnCourse> userCount = processListUserOwnCourseRepository
@@ -159,6 +159,218 @@ public class ProcessListController {
         response.put("totalPages", coursePage.getTotalPages());
 
         return ResponseEntity.ok().body(response);
+    }
+
+    @PostMapping("/searchDueCourse")
+    @Operation(summary = "수강 신청 예정 과정 검색")
+    public ResponseEntity<?> searchDueCourse(
+            @RequestParam String courseTitle,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        String excludedCourseId = "individual-subjects";
+        List<Course> courseLists = processListCourseRepository
+                .findByCourseIdNotAndCourseTitleContaining(excludedCourseId, courseTitle, Sort.by(Sort.Direction.ASC, "courseTitle"));
+
+        // 결과를 저장할 리스트
+        List<Map<String, Object>> resultList = new ArrayList<>();
+        
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        LocalDateTime nowDate = LocalDateTime.now();
+
+        for (Course course : courseLists) {
+
+            LocalDateTime courseDate = LocalDateTime.parse(course.getEnrollStartDate(), formatter);
+            if(courseDate.isAfter(nowDate)){
+
+                // 수강자 수 조회
+                List<ProcessListUserOwnCourse> userCount = processListUserOwnCourseRepository
+                        .findByCourseId(course.getCourseId());
+                int studentCount = userCount.size();
+    
+                // 과정 책임자 정보 조회
+                Optional<ProcessListUser> processListUsers = processListUserRepository
+                        .findBySessionId(course.getSessionId());
+    
+                // 각 과정 정보와 수강자 수를 HashMap에 추가
+                HashMap<String, Object> courseMap = new HashMap<>();
+                courseMap.put("courseId", course.getCourseId());
+                courseMap.put("courseTitle", course.getCourseTitle());
+                courseMap.put("courseCapacity", course.getCourseCapacity());
+                courseMap.put("enrollStartDate", course.getEnrollStartDate());
+                courseMap.put("enrollEndDate", course.getEnrollEndDate());
+                courseMap.put("studentCount", studentCount);
+                courseMap.put("courseImg", course.getCourseImg());
+    
+                // 책임자 정보 가져오기
+                courseMap.put("courseOfficerSessionId", processListUsers.get().getSessionId());
+                courseMap.put("courseOfficerUserName", processListUsers.get().getUserName());
+    
+                // 결과를 리스트에 추가
+                resultList.add(courseMap);
+
+            }
+
+        }
+
+        // 페이징 처리
+        int totalItems = resultList.size();
+        int totalPages = (int) Math.ceil((double) totalItems / size);
+        int start = page * size;
+        int end = Math.min(start + size, totalItems);
+
+        List<Map<String, Object>> pagedResultList = resultList.subList(start, end);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("officerCourse", pagedResultList);
+        response.put("currentPage", page);
+        response.put("totalItems", totalItems);
+        response.put("totalPages", totalPages);
+
+        return ResponseEntity.ok().body(response);
+
+    }
+
+    @PostMapping("/searchDeadlineCourse")
+    @Operation(summary = "수강 신청 마감 과정 검색")
+    public ResponseEntity<?> searchDeadlineCourse(
+            @RequestParam String courseTitle,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        String excludedCourseId = "individual-subjects";
+        List<Course> courseLists = processListCourseRepository
+                .findByCourseIdNotAndCourseTitleContaining(excludedCourseId, courseTitle, Sort.by(Sort.Direction.ASC, "courseTitle"));
+
+        // 결과를 저장할 리스트
+        List<Map<String, Object>> resultList = new ArrayList<>();
+        
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        LocalDateTime nowDate = LocalDateTime.now();
+
+        for (Course course : courseLists) {
+
+            LocalDateTime courseDate = LocalDateTime.parse(course.getEnrollEndDate(), formatter);
+            if(courseDate.isBefore(nowDate)){
+
+                // 수강자 수 조회
+                List<ProcessListUserOwnCourse> userCount = processListUserOwnCourseRepository
+                        .findByCourseId(course.getCourseId());
+                int studentCount = userCount.size();
+    
+                // 과정 책임자 정보 조회
+                Optional<ProcessListUser> processListUsers = processListUserRepository
+                        .findBySessionId(course.getSessionId());
+    
+                // 각 과정 정보와 수강자 수를 HashMap에 추가
+                HashMap<String, Object> courseMap = new HashMap<>();
+                courseMap.put("courseId", course.getCourseId());
+                courseMap.put("courseTitle", course.getCourseTitle());
+                courseMap.put("courseCapacity", course.getCourseCapacity());
+                courseMap.put("enrollStartDate", course.getEnrollStartDate());
+                courseMap.put("enrollEndDate", course.getEnrollEndDate());
+                courseMap.put("studentCount", studentCount);
+                courseMap.put("courseImg", course.getCourseImg());
+    
+                // 책임자 정보 가져오기
+                courseMap.put("courseOfficerSessionId", processListUsers.get().getSessionId());
+                courseMap.put("courseOfficerUserName", processListUsers.get().getUserName());
+    
+                // 결과를 리스트에 추가
+                resultList.add(courseMap);
+
+            }
+
+        }
+
+        // 페이징 처리
+        int totalItems = resultList.size();
+        int totalPages = (int) Math.ceil((double) totalItems / size);
+        int start = page * size;
+        int end = Math.min(start + size, totalItems);
+
+        List<Map<String, Object>> pagedResultList = resultList.subList(start, end);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("officerCourse", pagedResultList);
+        response.put("currentPage", page);
+        response.put("totalItems", totalItems);
+        response.put("totalPages", totalPages);
+
+        return ResponseEntity.ok().body(response);
+
+    }
+
+
+    @PostMapping("/searchReceivingCourse")
+    @Operation(summary = "수강 신청 중인 과정 검색")
+    public ResponseEntity<?> searchReceivingCourse(
+            @RequestParam String courseTitle,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        String excludedCourseId = "individual-subjects";
+        List<Course> courseLists = processListCourseRepository
+                .findByCourseIdNotAndCourseTitleContaining(excludedCourseId, courseTitle, Sort.by(Sort.Direction.ASC, "courseTitle"));
+
+        // 결과를 저장할 리스트
+        List<Map<String, Object>> resultList = new ArrayList<>();
+        
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        LocalDateTime nowDate = LocalDateTime.now();
+
+        for (Course course : courseLists) {
+
+            LocalDateTime enrollStartDate = LocalDateTime.parse(course.getEnrollStartDate(), formatter);
+            LocalDateTime enrollEndDate = LocalDateTime.parse(course.getEnrollEndDate(), formatter);
+            if(enrollStartDate.isAfter(nowDate) && enrollEndDate.isBefore(nowDate)){
+
+                // 수강자 수 조회
+                List<ProcessListUserOwnCourse> userCount = processListUserOwnCourseRepository
+                        .findByCourseId(course.getCourseId());
+                int studentCount = userCount.size();
+    
+                // 과정 책임자 정보 조회
+                Optional<ProcessListUser> processListUsers = processListUserRepository
+                        .findBySessionId(course.getSessionId());
+    
+                // 각 과정 정보와 수강자 수를 HashMap에 추가
+                HashMap<String, Object> courseMap = new HashMap<>();
+                courseMap.put("courseId", course.getCourseId());
+                courseMap.put("courseTitle", course.getCourseTitle());
+                courseMap.put("courseCapacity", course.getCourseCapacity());
+                courseMap.put("enrollStartDate", course.getEnrollStartDate());
+                courseMap.put("enrollEndDate", course.getEnrollEndDate());
+                courseMap.put("studentCount", studentCount);
+                courseMap.put("courseImg", course.getCourseImg());
+    
+                // 책임자 정보 가져오기
+                courseMap.put("courseOfficerSessionId", processListUsers.get().getSessionId());
+                courseMap.put("courseOfficerUserName", processListUsers.get().getUserName());
+    
+                // 결과를 리스트에 추가
+                resultList.add(courseMap);
+
+            }
+
+        }
+
+        // 페이징 처리
+        int totalItems = resultList.size();
+        int totalPages = (int) Math.ceil((double) totalItems / size);
+        int start = page * size;
+        int end = Math.min(start + size, totalItems);
+
+        List<Map<String, Object>> pagedResultList = resultList.subList(start, end);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("officerCourse", pagedResultList);
+        response.put("currentPage", page);
+        response.put("totalItems", totalItems);
+        response.put("totalPages", totalPages);
+
+        return ResponseEntity.ok().body(response);
+
     }
 
     @PostMapping("/searchCourse")
@@ -258,6 +470,11 @@ public class ProcessListController {
                     if (Long.parseLong(findCourse.get().getEnrollEndDate()) < nowDate
                             || Long.parseLong(findCourse.get().getEnrollStartDate()) > nowDate) {
                         return ResponseEntity.status(HttpStatus.CONFLICT).body("수강신청 기간이 아닙니다.");
+                    }
+
+                    List<ProcessListUserOwnCourse> findUsers = processListUserOwnCourseRepository.findByCourseId(courseId);
+                    if(findUsers.size() >= Integer.parseInt(findCourse.get().getCourseCapacity())){
+                        return ResponseEntity.status(HttpStatus.CONFLICT).body("수강 신청 인원이 전부 다 찼습니다.");
                     }
 
                     // 사용자의 과정 목록 확인

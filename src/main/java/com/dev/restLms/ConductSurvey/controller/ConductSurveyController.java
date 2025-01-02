@@ -401,36 +401,41 @@ public class ConductSurveyController {
                     // 해당 과목의 개설과목 코드 확인 
                     Optional<ConductSurveyOfferedSubjects> findOfferedSubejctId = conductSurveyOfferedSubjectsRepository.findByCourseIdAndSubjectIdAndOfficerSessionId(courseId, findCourseOwnSubject.getSubjectId(), sessionId);
 
-                    // 해당 과정의 과목을 만족도 조사 실시했는지 확인 
-                    Optional<ConductSurveyExecution> findSurveyExecution = conductSurveyExecutionRepository.findByCourseIdAndSessionIdAndOfferedSubjectsId(courseId, sessionId, findOfferedSubejctId.get().getOfferedSubjectsId());
+                    if(findOfferedSubejctId.isPresent()){
 
-                    if(findSurveyExecution.isEmpty()){
-
-                        // 해당 과목의 이름을 확인 
-                        Optional<ConductSurveySubject> findSubjectName = conductSurveySubjectRepository.findBySubjectId(findCourseOwnSubject.getSubjectId());
-
-                        HashMap<String, Object> subjectMap = new HashMap<>();
-                        subjectMap.put("subjectName", findSubjectName.get().getSubjectName());
-                        subjectMap.put("subjectId", findCourseOwnSubject.getSubjectId());
-                        subjectMap.put("courseId", courseId);
-                        subjectMap.put("subjectSurveyCheck", "none");
-
-                        resultList.add(subjectMap);
-
-                    }else{
-
-                        // 해당 과목의 이름을 확인 
-                        Optional<ConductSurveySubject> findSubjectName = conductSurveySubjectRepository.findBySubjectId(findCourseOwnSubject.getSubjectId());
-
-                        HashMap<String, Object> subjectMap = new HashMap<>();
-                        subjectMap.put("subjectName", findSubjectName.get().getSubjectName());
-                        subjectMap.put("subjectId", findCourseOwnSubject.getSubjectId());
-                        subjectMap.put("courseId", courseId);
-                        subjectMap.put("subjectSurveyCheck", "done");
-
-                        resultList.add(subjectMap);
-
+                        // 해당 과정의 과목을 만족도 조사 실시했는지 확인 
+                        Optional<ConductSurveyExecution> findSurveyExecution = conductSurveyExecutionRepository.findByCourseIdAndSessionIdAndOfferedSubjectsId(courseId, sessionId, findOfferedSubejctId.get().getOfferedSubjectsId());
+    
+                        if(findSurveyExecution.isEmpty()){
+    
+                            // 해당 과목의 이름을 확인 
+                            Optional<ConductSurveySubject> findSubjectName = conductSurveySubjectRepository.findBySubjectId(findCourseOwnSubject.getSubjectId());
+    
+                            HashMap<String, Object> subjectMap = new HashMap<>();
+                            subjectMap.put("subjectName", findSubjectName.get().getSubjectName());
+                            subjectMap.put("subjectId", findCourseOwnSubject.getSubjectId());
+                            subjectMap.put("courseId", courseId);
+                            subjectMap.put("subjectSurveyCheck", "none");
+    
+                            resultList.add(subjectMap);
+    
+                        }else{
+    
+                            // 해당 과목의 이름을 확인 
+                            Optional<ConductSurveySubject> findSubjectName = conductSurveySubjectRepository.findBySubjectId(findCourseOwnSubject.getSubjectId());
+    
+                            HashMap<String, Object> subjectMap = new HashMap<>();
+                            subjectMap.put("subjectName", findSubjectName.get().getSubjectName());
+                            subjectMap.put("subjectId", findCourseOwnSubject.getSubjectId());
+                            subjectMap.put("courseId", courseId);
+                            subjectMap.put("subjectSurveyCheck", "done");
+    
+                            resultList.add(subjectMap);
+    
+                        }
+                        
                     }
+
                 }
 
                 // compareTo 메서드를 사용해서 문자열을 비교하면서 sort메소드를 통해 정렬

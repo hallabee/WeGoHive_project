@@ -47,6 +47,8 @@ public class OfficerMainPageController {
         if(permissionCheck.isPresent()){
             if(permissionName.equals("OFFICER")){
                 return ResponseEntity.ok().body("책임자 권한이 식별되었습니다.");
+            }else if(permissionName.equals("INDIV_OFFICER")){
+                return ResponseEntity.ok().body("책임자 권한이 식별되었습니다.");
             }else{
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("책임자가 아닙니다.");
             }

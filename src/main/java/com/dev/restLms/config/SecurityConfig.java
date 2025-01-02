@@ -8,12 +8,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.dev.restLms.token.LoginSystem.LoginService.filter.JwtAuthenticationFilter;
-
+import com.dev.restLms.Auth.filter.JwtAuthenticationFilter;
 
 // 시큐리티 설정 없애기
 
@@ -25,7 +26,6 @@ public class SecurityConfig {
     @Autowired
     JwtAuthenticationFilter jwtAuthenticationFilter;
 
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -34,11 +34,30 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         auth -> auth
                                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui/index.html",
-                                "/api/login", "/api/security/getcontext", "/Home/RandSubjectVid", 
-                                "/freeBulletinBoard", "/announcement", "/announcement/mainBanner", "/announcementPost/images/**")
+                                        "/api/login", "/api/security/getcontext", "/Home/RandSubjectVid",
+                                        "/freeBulletinBoard", "/announcement", "/announcement/mainBanner",
+                                        "/announcementPost/images/**",
+                                        "/createCourse/images/{fileNo:.+}",
+                                        "/modifyCourse/images/{fileNo:.+}",
+                                        "/course/allTitles", "/serachSubject/images/{fileNo:.+}",
+                                        "/subjectApproval/images/{fileNo:.+}",
+                                        "/kakao/*", "/google/*", "/naver/*",
+                                        "/getAllSubjectInfo",
+                                        "/subjectInfoDetail/{offeredSubjectsId}",
+                                        "/teacher/subject/images/{fileNo:.+}",
+                                        "/teacher/video-management/images/{fileNo:.+}",
+                                        "/teacher/video-management/delete-video/{offeredSubjectsId}/{videoId}",
+                                        "/Videoplayer/videoList/{episodeId}/{offeredSubjectsId}",
+                                        "/slp/images/{fileNo:.+}",
+                                        "/sid/images/{fileNo:.+}",
+                                        "/op/images/{fileNo:.+}",
+                                        "/lecture/images/{fileNo:.+}",
+                                        "/Videoplayer/images/{fileNo:.+}",
+                                        "/announcement/images/{fileNo:.+}",
+                                        "/announcementPost/images/{fileNo:.+}",
+                                        "/courseComplete/download/certificate/**")
                                 .permitAll() // Swagger 관련 경로 허용
-                                .anyRequest().authenticated() //
-                )
+                                .anyRequest().authenticated())
                 .httpBasic(basic -> {
                 });
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -48,8 +67,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://10.10.24.67:3000")); // React 앱의
-                                                                                                            // URL 허용
+        configuration.setAllowedOrigins(
+                Arrays.asList("http://localhost:3000", "http://10.10.10.200:3000", "http://10.10.10.48:3000", "http://192.168.219.105:3000")); // React
+                                                                                                                // 앱의
+        // URL 허용
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE")); // 허용할 HTTP 메서드
         configuration.setAllowedHeaders(Arrays.asList("*")); // 모든 헤더 허용
         configuration.setAllowCredentials(true); // 자격 증명 허용
@@ -59,4 +80,10 @@ public class SecurityConfig {
         return source;
     }
 
+    @Bean
+    public HttpFirewall allowUrlWithDoubleSlash() {
+        StrictHttpFirewall firewall = new StrictHttpFirewall();
+        firewall.setAllowUrlEncodedDoubleSlash(true); // `//` 허용
+        return firewall;
+    }
 }

@@ -156,7 +156,7 @@ public class QuestionBoardPostController {
 
             boolean permissionNameCheck = false;
 
-            if(userPerssionName.equals("OFFICER") || userPerssionName.equals("SITE_OFFICER")){
+            if(userPerssionName.equals("OFFICER") || userPerssionName.equals("SITE_OFFICER") || userPerssionName.equals("INDIV_OFFICER")){
                 permissionNameCheck = true;
             }
 
@@ -222,7 +222,7 @@ public class QuestionBoardPostController {
 
             String permissionName  = permissionCheck.get().getPermissionName();
 
-            if(permissionName.equals("TEACHER") || permissionName.equals("OFFICER") || permissionName.equals("SITE_OFFICER")){
+            if(permissionName.equals("TEACHER") || permissionName.equals("OFFICER") || permissionName.equals("SITE_OFFICER") || permissionName.equals("INDIV_OFFICER")){
 
                 Optional<QuestionBoardPostUser> findUserNickname = questionBoardPostUserRepository.findBySessionId(sessionId);
 
@@ -265,7 +265,7 @@ public class QuestionBoardPostController {
 
             boolean permissionCheck = false;
 
-            if(permissionName.equals("OFFICER") || permissionName.equals("SITE_OFFICER")){
+            if(permissionName.equals("OFFICER") || permissionName.equals("SITE_OFFICER") || permissionName.equals("INDIV_OFFICER")){
                 permissionCheck = true;
             }
 
@@ -292,7 +292,6 @@ public class QuestionBoardPostController {
                 if(deleteComment.isPresent()){
                     questionBoardPostCommentRepository.deleteById(deleteComment.get().getCommentId());
                 }
-
 
                 questionBoardPostBoardPostRepository.deleteById(postId);
                 return ResponseEntity.ok().body("삭제 완료");
@@ -322,7 +321,7 @@ public class QuestionBoardPostController {
 
             String permissionName  = permissionCheck.get().getPermissionName();
 
-            if(permissionName.equals("TEACHER") || permissionName.equals("OFFICER") || permissionName.equals("SITE_OFFICER")){
+            if(permissionName.equals("TEACHER") || permissionName.equals("OFFICER") || permissionName.equals("SITE_OFFICER") || permissionName.equals("INDIV_OFFICER")){
 
                 questionBoardPostCommentRepository.deleteById(commentId);
                 return ResponseEntity.ok().body("삭제 완료");

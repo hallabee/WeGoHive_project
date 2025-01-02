@@ -373,7 +373,7 @@ public class ModifyCourseController {
             List<Map<String, Object>> resultList = new ArrayList<>();
 
             List<ModifyCourseOwnSubject> findSubjectIds = modifyCourseOwnSubjectRepository
-                    .findByCourseId("individual-subjects");
+                    .findByCourseIdAndSubjectApproval("individual-subjects", "T");
 
             List<String> filterSubjectIds = new ArrayList<>();
             for (ModifyCourseOwnSubject findSubjectId : findSubjectIds) {

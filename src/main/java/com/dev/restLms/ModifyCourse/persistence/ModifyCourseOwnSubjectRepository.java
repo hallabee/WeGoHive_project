@@ -9,5 +9,5 @@ import java.util.List;
 
 public interface ModifyCourseOwnSubjectRepository extends JpaRepository <CourseOwnSubject, String> {
     List<ModifyCourseOwnSubject> findByCourseIdAndOfficerSessionId(String courseId, String officerSessionId);
-    List<ModifyCourseOwnSubject> findByCourseId(String courseId);
+    List<ModifyCourseOwnSubject> findByCourseIdAndSubjectApproval(String courseId, String subjectApproval);
 }

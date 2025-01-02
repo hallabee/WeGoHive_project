@@ -336,7 +336,7 @@ public class CreateCourseController {
 
                 List<Map<String, Object>>resultList = new ArrayList<>();
 
-                List<CreateCourseOwnSubjuct> findSubjectIds = createCourseOwnSubjuctRepository.findByCourseId("individual-subjects");
+                List<CreateCourseOwnSubjuct> findSubjectIds = createCourseOwnSubjuctRepository.findByCourseIdAndSubjectApproval("individual-subjects", "T");
 
                 List<String> filterSubjectIds = new ArrayList<>();
                 for(CreateCourseOwnSubjuct findSubjectId : findSubjectIds ){
@@ -438,17 +438,24 @@ public class CreateCourseController {
                                 }
 
                             }else{
-                                
-                                Optional<CreateCourseSubject> findSubjectName = createCourseSubjectRepository.findBySubjectId(findTeacherHistory.getSubjectId());
 
-                                if(findSubjectName.isPresent()){
+                                Optional<CreateCourseOwnSubjuct> findSubjectCheck = createCourseOwnSubjuctRepository.findBySubjectIdAndSubjectApproval(findTeacherHistory.getSubjectId(), "T");
 
-                                    Map<String, Object> subjectMap = new HashMap<>();
-                                    subjectMap.put("subjectName", findSubjectName.get().getSubjectName());
+                                if(findSubjectCheck.isPresent()){
 
-                                    teacherSubjectList.add(subjectMap);
-
+                                    Optional<CreateCourseSubject> findSubjectName = createCourseSubjectRepository.findBySubjectId(findTeacherHistory.getSubjectId());
+    
+                                    if(findSubjectName.isPresent()){
+    
+                                        Map<String, Object> subjectMap = new HashMap<>();
+                                        subjectMap.put("subjectName", findSubjectName.get().getSubjectName());
+    
+                                        teacherSubjectList.add(subjectMap);
+    
+                                    }
+                                    
                                 }
+                                
 
                             }
 
