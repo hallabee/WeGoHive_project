@@ -104,62 +104,62 @@ public class ProcessListController {
         }
     }
 
-    @GetMapping("/allTitles")
-    @Operation(summary = "모든 과정 조회", description = "전체 과정 목록을 반환합니다.")
-    public ResponseEntity<?> getAllCoursesWithOfficer(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+    // @GetMapping("/allTitles")
+    // @Operation(summary = "모든 과정 조회", description = "전체 과정 목록을 반환합니다.")
+    // public ResponseEntity<?> getAllCoursesWithOfficer(
+    //         @RequestParam(defaultValue = "0") int page,
+    //         @RequestParam(defaultValue = "10") int size) {
 
-        // 페이징 요청
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "courseTitle"));
-        String excludedCourseId = "individual-subjects";
-        Page<Course> coursePage = processListCourseRepository.findByCourseIdNot(excludedCourseId, pageable);
+    //     // 페이징 요청
+    //     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "courseTitle"));
+    //     String excludedCourseId = "individual-subjects";
+    //     Page<Course> coursePage = processListCourseRepository.findByCourseIdNot(excludedCourseId, pageable);
 
-        // 결과를 저장할 리스트
-        List<Map<String, Object>> resultList = new ArrayList<>();
+    //     // 결과를 저장할 리스트
+    //     List<Map<String, Object>> resultList = new ArrayList<>();
 
-        for (Course course : coursePage) {
+    //     for (Course course : coursePage) {
 
-            if (!course.getCourseId().equals("individual-subjects")) {
+    //         if (!course.getCourseId().equals("individual-subjects")) {
 
-                // 수강자 수 조회
-                List<ProcessListUserOwnCourse> userCount = processListUserOwnCourseRepository
-                        .findByCourseId(course.getCourseId());
-                int studentCount = userCount.size();
+    //             // 수강자 수 조회
+    //             List<ProcessListUserOwnCourse> userCount = processListUserOwnCourseRepository
+    //                     .findByCourseId(course.getCourseId());
+    //             int studentCount = userCount.size();
 
-                // 과정 책임자 정보 조회
-                Optional<ProcessListUser> processListUsers = processListUserRepository
-                        .findBySessionId(course.getSessionId());
+    //             // 과정 책임자 정보 조회
+    //             Optional<ProcessListUser> processListUsers = processListUserRepository
+    //                     .findBySessionId(course.getSessionId());
 
-                // 각 과정 정보와 수강자 수를 HashMap에 추가
-                HashMap<String, Object> courseMap = new HashMap<>();
-                courseMap.put("courseId", course.getCourseId());
-                courseMap.put("courseTitle", course.getCourseTitle());
-                courseMap.put("courseCapacity", course.getCourseCapacity());
-                courseMap.put("enrollStartDate", course.getEnrollStartDate());
-                courseMap.put("enrollEndDate", course.getEnrollEndDate());
-                courseMap.put("studentCount", studentCount);
-                courseMap.put("courseImg", course.getCourseImg());
+    //             // 각 과정 정보와 수강자 수를 HashMap에 추가
+    //             HashMap<String, Object> courseMap = new HashMap<>();
+    //             courseMap.put("courseId", course.getCourseId());
+    //             courseMap.put("courseTitle", course.getCourseTitle());
+    //             courseMap.put("courseCapacity", course.getCourseCapacity());
+    //             courseMap.put("enrollStartDate", course.getEnrollStartDate());
+    //             courseMap.put("enrollEndDate", course.getEnrollEndDate());
+    //             courseMap.put("studentCount", studentCount);
+    //             courseMap.put("courseImg", course.getCourseImg());
 
-                // 책임자 정보 가져오기
-                courseMap.put("courseOfficerSessionId", processListUsers.get().getSessionId());
-                courseMap.put("courseOfficerUserName", processListUsers.get().getUserName());
+    //             // 책임자 정보 가져오기
+    //             courseMap.put("courseOfficerSessionId", processListUsers.get().getSessionId());
+    //             courseMap.put("courseOfficerUserName", processListUsers.get().getUserName());
 
-                // 결과를 리스트에 추가
-                resultList.add(courseMap);
+    //             // 결과를 리스트에 추가
+    //             resultList.add(courseMap);
 
-            }
+    //         }
 
-        }
+    //     }
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("courses", resultList);
-        response.put("currentPage", coursePage.getNumber());
-        response.put("totalItems", coursePage.getTotalElements());
-        response.put("totalPages", coursePage.getTotalPages());
+    //     Map<String, Object> response = new HashMap<>();
+    //     response.put("courses", resultList);
+    //     response.put("currentPage", coursePage.getNumber());
+    //     response.put("totalItems", coursePage.getTotalElements());
+    //     response.put("totalPages", coursePage.getTotalPages());
 
-        return ResponseEntity.ok().body(response);
-    }
+    //     return ResponseEntity.ok().body(response);
+    // }
 
     @PostMapping("/searchDueCourse")
     @Operation(summary = "수강 신청 예정 과정 검색")

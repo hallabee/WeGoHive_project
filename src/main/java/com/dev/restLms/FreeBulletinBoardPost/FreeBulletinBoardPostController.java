@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.dev.restLms.entity.BoardPost;
 import com.dev.restLms.entity.Comment;
 import com.dev.restLms.entity.FileInfo;
+import com.dev.restLms.entity.PermissionGroup;
 import com.dev.restLms.entity.UserOwnPermissionGroup;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -76,6 +77,40 @@ public class FreeBulletinBoardPostController {
     private static final String UPLOAD_DIR = "Board/";
     private static final String BOARD_DIR = "BulletinBoard/";
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB (바이트 단위)
+
+    @GetMapping("/postCheck")
+    @Operation(summary = "사용자 식별")
+    public ResponseEntity<?> getPermissionCheck() {
+
+        UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                                .getContext().getAuthentication();
+                // 유저 세션아이디 보안 컨텍스트에서 가져오기
+                String sessionId = auth.getPrincipal().toString();
+
+                Optional<UserOwnPermissionGroup> permissionCheck = freeBulletinBoardPostUserOwnPermissionGroupRepository.findBySessionId(sessionId);
+
+                Map<String, String> permissionMap = new HashMap<>();
+
+                if(permissionCheck.isPresent()){
+
+                    Optional<FreeBulletinBoardPostPermissionGroup> findPermissionName = freeBulletinBoardPostPermissionGroupRepository.findByPermissionGroupUuid(permissionCheck.get().getPermissionGroupUuid2());
+
+                    if(findPermissionName.isPresent()){
+
+                        permissionMap.put("permissionName", findPermissionName.get().getPermissionName());
+                        permissionMap.put("message", "작성 권한이 확인되었습니다.");
+
+                    }
+
+                }
+
+        if(permissionCheck.isPresent()){
+            return ResponseEntity.ok().body(permissionMap);
+        }else{
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("작성 권한이 없습니다.");
+        }
+
+    }
 
     @PostMapping("/post")
     @Operation(summary = "자유게시판 게시글 작성", description = "자유게시판에서 게시글을 작성합니다.")
@@ -156,8 +191,6 @@ public class FreeBulletinBoardPostController {
             } catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("파일 업로드 실패" + e.getMessage());
             }
-
-
     }
 
     private Map<String, Object> saveFile(MultipartFile file, BoardPost userBoardPost) throws Exception{
