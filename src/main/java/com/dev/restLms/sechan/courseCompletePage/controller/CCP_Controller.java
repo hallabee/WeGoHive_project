@@ -204,17 +204,16 @@ public class CCP_Controller {
             //         .getContext().getAuthentication();
             // String userSessionId = auth.getPrincipal().toString();
 
-            
-
+        
             // courseId에 해당하는 courseTitle 가져오기
             Optional<Course> courseOpt = ccp_c_repository.findById(courseId);
             if (courseOpt.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당 과정을 찾을 수 없습니다.");
             }
-            String courseTitle = courseOpt.get().getCourseTitle();
+            // String courseTitle = courseOpt.get().getCourseTitle();
 
             // 수료증 경로 생성
-            String filePath = "src/main/resources/static/Certificates/" + courseTitle;
+            String filePath = "src/main/resources/static/Certificates/";
             Path directoryPath = Paths.get(filePath);
 
             // 디렉토리에서 파일 찾기

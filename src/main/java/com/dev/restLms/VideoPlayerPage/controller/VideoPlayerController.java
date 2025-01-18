@@ -10,14 +10,12 @@ import com.dev.restLms.VideoPlayerPage.projection.VideoPlayerBookMark;
 import com.dev.restLms.VideoPlayerPage.projection.VideoPlayerSubjectOwnVideo;
 import com.dev.restLms.VideoPlayerPage.projection.VideoPlayerUser;
 import com.dev.restLms.VideoPlayerPage.repository.VideoPlayerBookMarkRepository;
-import com.dev.restLms.VideoPlayerPage.repository.VideoPlayerFileInfoRepository;
 import com.dev.restLms.VideoPlayerPage.repository.VideoPlayerOfferedSubjectsRepository;
 import com.dev.restLms.VideoPlayerPage.repository.VideoPlayerSubjectOwnVideoRepository;
 import com.dev.restLms.VideoPlayerPage.repository.VideoPlayerUserOwnSubjectVideoRepository;
 import com.dev.restLms.VideoPlayerPage.repository.VideoPlayerUserRepository;
 import com.dev.restLms.VideoPlayerPage.repository.VideoPlayerVideoRepository;
 import com.dev.restLms.entity.BookMark;
-import com.dev.restLms.entity.FileInfo;
 import com.dev.restLms.entity.OfferedSubjects;
 import com.dev.restLms.entity.UserOwnSubjectVideo;
 import com.dev.restLms.entity.Video;
@@ -26,8 +24,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,16 +32,12 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -72,33 +64,6 @@ public class VideoPlayerController {
   @Autowired
   VideoPlayerUserRepository videoPlayerUserRepository;
 
-  @Autowired
-  VideoPlayerFileInfoRepository videoPlayerFileInfoRepository;
-
-  @GetMapping("/images/{fileNo:.+}")
-    public ResponseEntity<Resource> getImage(@PathVariable String fileNo) {
-        try {
-            Optional<FileInfo> fileInfoOptional = videoPlayerFileInfoRepository.findByFileNo(fileNo);
-            if (!fileInfoOptional.isPresent()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-            }
-
-            FileInfo fileInfo = fileInfoOptional.get();
-            Path filePath = Paths.get(fileInfo.getFilePath() + fileInfo.getEncFileNm());
-            Resource resource = new UrlResource(filePath.toUri());
-
-            if (resource.exists() || resource.isReadable()) {
-                return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG) // 이미지 형식에 맞게 설정
-                        .body(resource);
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-            }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-    }
-  
   @GetMapping("/specificTeacherId")
   public ResponseEntity<Map<String, String>> findSpecificTeacherId(@RequestParam String offeredSubjectsId) {
     // Optional 처리

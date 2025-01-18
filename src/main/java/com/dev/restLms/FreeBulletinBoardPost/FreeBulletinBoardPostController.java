@@ -191,6 +191,8 @@ public class FreeBulletinBoardPostController {
             } catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("파일 업로드 실패" + e.getMessage());
             }
+
+
     }
 
     private Map<String, Object> saveFile(MultipartFile file, BoardPost userBoardPost) throws Exception{

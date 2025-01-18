@@ -17,4 +17,5 @@ public class OfferedSubjectsDTO {
     private String officerSessionId;
     private String subjectId;
     private String teacherSessionId;
+    private String subjectName;
 }

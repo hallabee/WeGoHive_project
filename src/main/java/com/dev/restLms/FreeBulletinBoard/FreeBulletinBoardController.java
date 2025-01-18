@@ -58,7 +58,6 @@ public class FreeBulletinBoardController {
         ) {
 
             try {
-
                  // 자유 게시판의 게시판 아이디 확인 
                 Optional<FreeBulletinBoard> findBoardId = freeBulletinBoardRepository.findByBoardCategory("자유게시판");
 

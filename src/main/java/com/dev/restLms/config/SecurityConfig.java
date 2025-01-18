@@ -52,10 +52,15 @@ public class SecurityConfig {
                                         "/sid/images/{fileNo:.+}",
                                         "/op/images/{fileNo:.+}",
                                         "/lecture/images/{fileNo:.+}",
-                                        "/Videoplayer/images/{fileNo:.+}",
-                                        "/announcement/images/{fileNo:.+}",
-                                        "/announcementPost/images/{fileNo:.+}",
-                                        "/courseComplete/download/certificate/**")
+                                        "/courseComplete/download/certificate/**",
+                                        "/course/titles",
+                                        "/course/images/{fileNo:.+}",
+                                        "/course/searchDueCourse",
+                                        "/course/searchDeadlineCourse",
+                                        "/course/searchReceivingCourse",
+                                        "/freeBulletinBoardPost/images/{fileNo:.+}",
+                                        "/freeBulletinBoardPost/download/{fileNo}",
+                                        "/announcementPost/download/{fileNo}")
                                 .permitAll() // Swagger 관련 경로 허용
                                 .anyRequest().authenticated())
                 .httpBasic(basic -> {
